@@ -3,6 +3,8 @@ from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkSegmentedB
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+import pandas as pd
+from redmail import gmail
 
 
 class App(customtkinter.CTk):
@@ -30,7 +32,7 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(8, weight=1) 
 
-        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="EmailZapprz  ", 
+        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="EmailZapprz", 
                                                              compound="right", font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=2, column=0, padx=20, pady=50)
         
@@ -103,9 +105,53 @@ class App(customtkinter.CTk):
         )
         if file_path:
         # You can add the logic to process the Excel file here
-           messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+            messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+            try:
+                excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
+                excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
+            except Exception as e:
+                messagebox.showwarning("Error","Excel file error")
         else:
            messagebox.showwarning("No File", "Please select an Excel file.")
+
+def mail_preprocesser(excel_file_path):
+        error_mail_id = []
+        # try:
+            # excel_file_df_to_mail = pd.read_excel(excel_file_path,sheet_name="Sheet2")
+            # excel_file_df_from_mail = pd.read_excel(excel_file_path, sheet_name="Sheet1")
+            # print(excel_file_df_to_mail)
+        for index, row in excel_file_df_to_mail.iterrows():
+                # print(f"To mail {index+1},{row[0]}, {row[1]}")
+                try:
+                    for i, email_data in excel_file_df_from_mail.iterrows():
+                        if email_data[0] not in error_mail_id:
+                            try:
+                                print(f"From mail {i+1},{email_data[0]}, {email_data[1]}")
+                                recipient_email = row[0] # Assuming your Excel file has a column named 'Email'
+                                gmail.username =   email_data[0]# Notification mail sent to registered mail of customer
+                                gmail.password = email_data[1]
+                                gmail.send(subject = "Checking subject4",
+                                                    receivers = [recipient_email],
+                                                        ##################### Content for email ########################### 
+                                                        html ="""
+<html>
+<head>
+</head>
+<body>
+Checking
+</body>
+</html>
+                            """,
+                                body_params={
+                                },)
+                                break
+                            except Exception as e:
+                                error_mail_id.append(email_data[0])
+                                print(f"{email_data[0]} added to error list")
+                except Exception as e:
+                    print(e)
+        # except Exception as e:
+        #     messagebox.showwarning("Error","Excel file error")
 
 
 if __name__ == "__main__":
