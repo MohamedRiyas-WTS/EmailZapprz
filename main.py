@@ -36,11 +36,11 @@ class App(customtkinter.CTk):
                                                              compound="right", font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=2, column=0, padx=20, pady=50)
         
-        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
+        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Excel Uploader",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), anchor="w", command=self.home_button_event)
         self.home_button.grid(row=3, column=0, sticky="ew")
 
-        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Credentials",
+        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Html Uploader",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.frame_2_button_event)
         self.frame_2_button.grid(row=4, column=0, sticky="ew")
@@ -62,9 +62,20 @@ class App(customtkinter.CTk):
         self.home_frame_qoute1_label.grid(row=1, column=0, padx=20, pady=20)
 
         self.path_frame_button = CTkButton(self.home_frame, text="Excel Path",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_file)
-        self.path_frame_button.grid(row=2, column=0, padx=20, pady=70)
+        self.path_frame_button.grid(row=2, column=0, padx=20, pady=10)
         self.url_frame_button = CTkButton(self.home_frame, text="File URL",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10)
-        self.url_frame_button.grid(row=3, column=0, padx=20, pady=70)
+        self.url_frame_button.grid(row=3, column=0, padx=20, pady=20)
+        self.url_frame_button = customtkinter.CTkLabel(self.home_frame, text="Expecting\nSheet1 -> From Mail Credential \nSheet2 -> To Mail Credentials",font=CTkFont(family="times",size=15,weight="bold"),fg_color='#3b8ed0',height=40,text_color="#1c1c1c",corner_radius=10)
+        self.url_frame_button.grid(row=4, column=0, padx=20, pady=40)
+
+        # create second frame
+        self.second_frame = customtkinter.CTkFrame(self, corner_radius=50, fg_color="blue")
+        self.tabview = customtkinter.CTkTabview(self.second_frame, width=450,height=400)
+        self.tabview.grid(row=0, column=1, padx=(170, 50), pady=(80,50), sticky="nsew")
+        self.tabview.add("Email")
+        self.tabview.add("Skype")
+        self.tabview.tab("Email").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
+        self.tabview.tab("Skype").grid_columnconfigure(2, weight=1)
 
 
     def select_frame_by_name(self, name):
