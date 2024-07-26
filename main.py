@@ -5,6 +5,8 @@ from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
 from redmail import gmail
+import customtkinter
+
 
 
 class App(customtkinter.CTk):
@@ -65,17 +67,115 @@ class App(customtkinter.CTk):
         self.path_frame_button.grid(row=2, column=0, padx=20, pady=10)
         self.url_frame_button = CTkButton(self.home_frame, text="File URL",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10)
         self.url_frame_button.grid(row=3, column=0, padx=20, pady=20)
-        self.url_frame_button = customtkinter.CTkLabel(self.home_frame, text="Expecting\nSheet1 -> From Mail Credential \nSheet2 -> To Mail Credentials",font=CTkFont(family="times",size=15,weight="bold"),fg_color='#3b8ed0',height=40,text_color="#1c1c1c",corner_radius=10)
+        self.url_frame_button = customtkinter.CTkLabel(self.home_frame, text="Expecting\nSheet1 --> From Mail Credential \nSheet2 --> To Mail Credentials",font=CTkFont(family="times",size=15,weight="bold"),fg_color='#3b8ed0',height=40,text_color="#1c1c1c",corner_radius=10)
         self.url_frame_button.grid(row=4, column=0, padx=20, pady=40)
 
         # create second frame
-        self.second_frame = customtkinter.CTkFrame(self, corner_radius=50, fg_color="blue")
-        self.tabview = customtkinter.CTkTabview(self.second_frame, width=450,height=400)
-        self.tabview.grid(row=0, column=1, padx=(170, 50), pady=(80,50), sticky="nsew")
-        self.tabview.add("Email")
-        self.tabview.add("Skype")
-        self.tabview.tab("Email").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
-        self.tabview.tab("Skype").grid_columnconfigure(2, weight=1)
+        self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="grey")
+        self.second_frame.grid_columnconfigure(0, weight=1)
+        # Set row and column weights
+        self.second_frame.grid_rowconfigure(1, weight=1)
+
+        self.seg_button_1 = customtkinter.CTkSegmentedButton(self.second_frame,font=CTkFont(family="times",size=18,weight="bold"),width=500,command=self.change_segment_event)
+        self.seg_button_1.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.seg_button_1.configure(values=["Dynamic", "Static"])
+        self.seg_button_1.set("Dynamic")
+
+        self.dynamic_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
+        self.dynamic_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+
+        self.static_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
+        self.static_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+
+        self.static_frame.grid_forget()
+        
+        self.textbox_dynamic = customtkinter.CTkTextbox(self.dynamic_frame, width=700,fg_color="blue",height=340)
+        self.textbox_dynamic.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
+        self.textbox_dynamic = customtkinter.CTkTextbox(self.static_frame, width=700,fg_color="blue",height=340)
+        self.textbox_dynamic.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
+        # self.tabview = customtkinter.CTkTabview(self.second_frame, width=700,height=450,corner_radius=50)
+        # self.tabview.grid(row=0, column=1, padx=(65, 0), pady=(50,100), sticky="nsew")
+        # self.tabview.add("Static")
+        # self.tabview.add("Dynamic")
+        # self.tabview.tab("Static").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
+        # self.tabview.tab("Dynamic").grid_columnconfigure(2, weight=1)
+        self.static_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.static_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
+        self.dynamic_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.list_frame_show)
+        self.dynamic_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
+        self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
+        self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
+        self.static_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.static_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
+        self.dynamic_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.dynamic_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
+        self.entry_dynamic = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
+        self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
+        self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
+        self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.list_frame.grid_forget()
+
+
+
+
+    def change_segment_event(self,name):
+        if name == "Dynamic":
+            self.dynamic_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
+            self.dynamic_frame.grid(row=1, column=0,  padx=(20, 20), pady=(10, 20), sticky="ew")
+        else:
+            self.dynamic_frame.grid_forget()
+        if name == "Static":
+            self.static_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
+            self.static_frame.grid(row=1, column=0,  padx=(20, 20), pady=(10, 20), sticky="ew")
+        else:
+            self.static_frame.grid_forget()
+
+    def list_frame_show(self):
+        self.static_frame.grid_forget()
+        self.dynamic_frame.grid_forget()
+        self.list_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
+        self.list_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ew")
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.list_frame, label_text="Email Mapping",height=350,width=700)
+        self.scrollable_frame.grid(row=1, column=2, padx=(25, 10), pady=(20,150), sticky="nsew")
+        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.scrollable_frame_switches = []
+        replacer_list = ["people","move","date"]
+        header_list = ["name","position"]
+        # for i in range(5):
+        #     switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"CTkSwitch {i}")
+        #     switch.grid(row=i, column=0, padx=10, pady=(0, 20))
+            # self.scrollable_frame_switches.append(switch)
+        for index,context in enumerate(replacer_list):
+            context_label = customtkinter.CTkLabel(master=self.scrollable_frame,text=context)
+            context_label.grid(row=index,column=0, padx=10, pady=(0, 20))
+            context_list = customtkinter.CTkComboBox(self.scrollable_frame,
+                                                    values=header_list)
+            context_list.grid(row=index,column=2, padx=10, pady=(0, 20))
+            entry_dynamic = customtkinter.CTkEntry(self.scrollable_frame)
+            entry_dynamic.grid(row=index, column=1, padx=10, pady=(0, 20))
+
+            self.scrollable_frame_switches.append((entry_dynamic, context_list))
+
+            # Bind the entry widget to the callback function
+            entry_dynamic.bind("<KeyRelease>", lambda event, e=entry_dynamic, c=context_list: self.on_entry_change(e, c))
+
+        
+        
+        self.submit_list_button = customtkinter.CTkButton(self.list_frame, corner_radius=30, text="Submit",
+                                                         fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+        self.submit_list_button.grid(row=1, column=1, columnspan=2, rowspan=2, pady=(350, 10))
+
+    def on_entry_change(self, entry, combo_box):
+        if entry.get():  # Check if the entry has text
+            combo_box.configure(state="disabled")
+        else:
+            combo_box.configure(state="normal")
+
+            
+
+            
+
+
 
 
     def select_frame_by_name(self, name):
@@ -94,6 +194,12 @@ class App(customtkinter.CTk):
         else:
             self.second_frame.grid_forget()
 
+    # def segment_dynamic(self):
+    #     self.change_segment_event("Dynamic")
+    
+    # def segment_static(self):
+    #     self.change_segment_event("Static")
+  
     def home_button_event(self):
         # Frame Home
         self.select_frame_by_name("home")
@@ -168,3 +274,5 @@ Checking
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
+
