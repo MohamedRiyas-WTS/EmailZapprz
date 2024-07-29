@@ -6,12 +6,19 @@ from tkinter import messagebox
 import pandas as pd
 from redmail import gmail
 import customtkinter
+import re
 
 
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+        self.excel_file_df_from_mail = None
+        self.excel_file_df_to_mail = None
+        self.html_full_content = None
+        self.body_params = None
+        self.excel_file_to_mail_header_list = []
+        self.scrollable_frame_switches = []
         self.title("EmailZapprz")
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
@@ -91,17 +98,16 @@ class App(customtkinter.CTk):
         
         self.textbox_dynamic = customtkinter.CTkTextbox(self.dynamic_frame, width=700,fg_color="blue",height=340)
         self.textbox_dynamic.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
-        self.textbox_dynamic = customtkinter.CTkTextbox(self.static_frame, width=700,fg_color="blue",height=340)
-        self.textbox_dynamic.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
+        
         # self.tabview = customtkinter.CTkTabview(self.second_frame, width=700,height=450,corner_radius=50)
         # self.tabview.grid(row=0, column=1, padx=(65, 0), pady=(50,100), sticky="nsew")
         # self.tabview.add("Static")
         # self.tabview.add("Dynamic")
         # self.tabview.tab("Static").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
         # self.tabview.tab("Dynamic").grid_columnconfigure(2, weight=1)
-        self.static_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.static_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_html_file)
         self.static_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
-        self.dynamic_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.list_frame_show)
+        self.dynamic_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_custom_file)
         self.dynamic_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
         self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
         self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
@@ -115,9 +121,6 @@ class App(customtkinter.CTk):
         self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.list_frame.grid_forget()
 
-
-
-
     def change_segment_event(self,name):
         if name == "Dynamic":
             self.dynamic_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
@@ -130,7 +133,20 @@ class App(customtkinter.CTk):
         else:
             self.static_frame.grid_forget()
 
-    def list_frame_show(self):
+    def get_entry_data(self):
+        data_dict = {}
+        for label, entry_widget, combo_box in self.scrollable_frame_switches:
+            key = label.cget("text")
+            entry_value = entry_widget.get()
+            combo_value = combo_box.get()
+            if entry_value:
+                data_dict[key] = entry_value
+            else:
+                data_dict[key] = f"row['{combo_value}']"
+        
+        return data_dict
+
+    def list_frame_show(self,params_variable, params_name):
         self.static_frame.grid_forget()
         self.dynamic_frame.grid_forget()
         self.list_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
@@ -139,32 +155,32 @@ class App(customtkinter.CTk):
         self.scrollable_frame.grid(row=1, column=2, padx=(25, 10), pady=(20,150), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         self.scrollable_frame_switches = []
-        replacer_list = ["people","move","date"]
-        header_list = ["name","position"]
+        replacer_list = params_variable
+        header_list = params_name
         # for i in range(5):
         #     switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"CTkSwitch {i}")
         #     switch.grid(row=i, column=0, padx=10, pady=(0, 20))
             # self.scrollable_frame_switches.append(switch)
         for index,context in enumerate(replacer_list):
+            
             context_label = customtkinter.CTkLabel(master=self.scrollable_frame,text=context)
             context_label.grid(row=index,column=0, padx=10, pady=(0, 20))
-            context_list = customtkinter.CTkComboBox(self.scrollable_frame,
-                                                    values=header_list)
+            context_list = customtkinter.CTkComboBox(self.scrollable_frame,values=header_list)
             context_list.grid(row=index,column=2, padx=10, pady=(0, 20))
             entry_dynamic = customtkinter.CTkEntry(self.scrollable_frame)
             entry_dynamic.grid(row=index, column=1, padx=10, pady=(0, 20))
-
-            self.scrollable_frame_switches.append((entry_dynamic, context_list))
+            self.scrollable_frame_switches.append((context_label, entry_dynamic, context_list))
 
             # Bind the entry widget to the callback function
             entry_dynamic.bind("<KeyRelease>", lambda event, e=entry_dynamic, c=context_list: self.on_entry_change(e, c))
-
-        
-        
         self.submit_list_button = customtkinter.CTkButton(self.list_frame, corner_radius=30, text="Submit",
-                                                         fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+                                                         fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.dynamic_submit_button)
         self.submit_list_button.grid(row=1, column=1, columnspan=2, rowspan=2, pady=(350, 10))
 
+    def dynamic_submit_button(self):
+        self.body_params = self.get_entry_data()
+        self.mail_preprocesser()
+        
     def on_entry_change(self, entry, combo_box):
         if entry.get():  # Check if the entry has text
             combo_box.configure(state="disabled")
@@ -172,12 +188,6 @@ class App(customtkinter.CTk):
             combo_box.configure(state="normal")
 
             
-
-            
-
-
-
-
     def select_frame_by_name(self, name):
 
         # set button color for selected button
@@ -224,52 +234,102 @@ class App(customtkinter.CTk):
         # You can add the logic to process the Excel file here
             messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
             try:
-                excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
-                excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
+                self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
+                self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
+                excel_header = pd.read_excel(file_path,sheet_name="Sheet2")
+                self.excel_file_to_mail_header_list = excel_header.columns.tolist()
+                ###########################################
+                self.frame_2_button_event()
             except Exception as e:
                 messagebox.showwarning("Error","Excel file error")
         else:
            messagebox.showwarning("No File", "Please select an Excel file.")
 
-def mail_preprocesser(excel_file_path):
-        error_mail_id = []
-        # try:
-            # excel_file_df_to_mail = pd.read_excel(excel_file_path,sheet_name="Sheet2")
-            # excel_file_df_from_mail = pd.read_excel(excel_file_path, sheet_name="Sheet1")
-            # print(excel_file_df_to_mail)
-        for index, row in excel_file_df_to_mail.iterrows():
-                # print(f"To mail {index+1},{row[0]}, {row[1]}")
-                try:
-                    for i, email_data in excel_file_df_from_mail.iterrows():
-                        if email_data[0] not in error_mail_id:
-                            try:
-                                print(f"From mail {i+1},{email_data[0]}, {email_data[1]}")
-                                recipient_email = row[0] # Assuming your Excel file has a column named 'Email'
-                                gmail.username =   email_data[0]# Notification mail sent to registered mail of customer
-                                gmail.password = email_data[1]
-                                gmail.send(subject = "Checking subject4",
-                                                    receivers = [recipient_email],
-                                                        ##################### Content for email ########################### 
-                                                        html ="""
-<html>
-<head>
-</head>
-<body>
-Checking
-</body>
-</html>
-                            """,
-                                body_params={
-                                },)
-                                break
-                            except Exception as e:
-                                error_mail_id.append(email_data[0])
-                                print(f"{email_data[0]} added to error list")
-                except Exception as e:
-                    print(e)
-        # except Exception as e:
-        #     messagebox.showwarning("Error","Excel file error")
+    def upload_html_file(self):
+        file_path = filedialog.askopenfilename(
+        filetypes=[("Html files", "*.html *.htm *.txt")],
+        title="Select an Excel file"
+        )
+        if file_path:
+                messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+            
+                if re.search(".txt$",file_path):
+                    with open(file_path,"r") as html_content:
+                        file_content_str= html_content.read()   
+                else:
+                    with open(file_path,"rb") as html_content:
+                        file_content = html_content.read()
+                    file_content_str = file_content.decode('utf-8')
+                self.html_full_content = file_content_str
+                params_variable= re.findall("\{\{(\w+)\}\}",str(file_content_str))
+                if params_variable:
+                    if self.excel_file_to_mail_header_list:
+                        self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
+                    else:
+                        print("Empty header list")
+                else:
+                    print("Empty params variable list")
+            # except Exception as e:
+            #     messagebox.showwarning("Error", "Html/Text file Error")
+        else:
+           messagebox.showwarning("No File", "Please select an Html/Text file.")
+        
+    def upload_custom_file(self):
+        input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
+        self.html_full_content = input_value
+        if len(input_value) > 1 and input_value.strip() != "":
+            params_variable = re.findall("\{\{(\w+)\}\}",input_value)
+            if params_variable:
+                if self.excel_file_to_mail_header_list:
+                    self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
+                else:
+                    print("Empty header list")
+            else:
+                print("Empty params variable list")
+        else:
+            print("Empty")
 
+    def evaluate_body_params(self, row):
+        body_params = {}
+        for key, value in self.body_params.items():
+            if value.startswith("row['") and value.endswith("']"):
+                col_name = value[5:-2]
+                body_params[key] = row[col_name]
+            else:
+                body_params[key] = value
+        return body_params
+
+    def mail_preprocesser(self):
+            error_mail_id = []
+            for index, row in self.excel_file_df_to_mail.iterrows():
+                    # print(f"To mail {index+1},{row[0]}, {row[1]}")
+                    try:
+                        for i, email_data in self.excel_file_df_from_mail.iterrows():
+                            if email_data[0] not in error_mail_id:
+                                try:
+                                    print(index, row[0])
+                                    recipient_email = row[0] # Assuming your Excel file has a column named 'Email'
+                                    gmail.username =   email_data[0]# Notification mail sent to registered mail of customer
+                                    gmail.password = email_data[1]
+                                    gmail.send(subject = "Checking subject4",
+                                                receivers = [recipient_email],
+                                                html =self.html_full_content,
+                                    body_params=self.evaluate_body_params(row),)
+                                    break
+                                except Exception as e:
+                                    error_mail_id.append(email_data[0])
+                                    print(f"{email_data[0]} added to error list")
+                    except Exception as e:
+                        print(e)
+
+    
+           
+def html_params_separator(html_file):
+    
+    try:
+        pass
+    except:
+        pass
 
 if __name__ == "__main__":
     app = App()
