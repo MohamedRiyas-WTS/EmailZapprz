@@ -17,6 +17,7 @@ class App(customtkinter.CTk):
         self.excel_file_df_to_mail = None
         self.html_full_content = None
         self.body_params = None
+        self.excel_file_path = None
         self.excel_file_to_mail_header_list = []
         self.scrollable_frame_switches = []
         self.title("EmailZapprz")
@@ -117,9 +118,9 @@ class App(customtkinter.CTk):
         self.dynamic_sub_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
         self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
         self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
-        self.static_upload_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.static_upload_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_html_file)
         self.static_upload_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
-        self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_custom_file)
         self.static_sub_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
@@ -248,6 +249,7 @@ class App(customtkinter.CTk):
             try:
                 self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
                 self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
+                self.excel_file_path = file_path
                 excel_header = pd.read_excel(file_path,sheet_name="Sheet2")
                 self.excel_file_to_mail_header_list = excel_header.columns.tolist()
                 messagebox.showinfo("File Selected", "Excel file read successfully")
@@ -289,8 +291,8 @@ class App(customtkinter.CTk):
         
     def upload_custom_file(self):
         input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
-        self.html_full_content = input_value
         if len(input_value) > 1 and input_value.strip() != "":
+            self.html_full_content = input_value
             params_variable = re.findall("\{\{(\w+)\}\}",input_value)
             if params_variable:
                 if self.excel_file_to_mail_header_list:
@@ -302,23 +304,58 @@ class App(customtkinter.CTk):
         else:
             print("Empty")
 
+    def upload_static_html_file(self):
+        file_path = filedialog.askopenfilename(
+        filetypes=[("Html files", "*.html *.htm *.txt")],
+        title="Select an Excel file"
+        )
+        if file_path:
+                messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+                if re.search(".txt$",file_path):
+                    with open(file_path,"r") as html_content:
+                        file_content_str= html_content.read()   
+                else:
+                    with open(file_path,"rb") as html_content:
+                        file_content = html_content.read()
+                    file_content_str = file_content.decode('utf-8')
+                self.html_full_content = file_content_str
+            # except Exception as e:
+            #     messagebox.showwarning("Error", "Html/Text file Error")
+        else:
+           messagebox.showwarning("No File", "Please select an Html/Text file.")
+
+    def upload_static_custom_file(self):
+        input_value = self.textbox_static.get("1.0", "end")  # Get text from textbox
+        
+        if len(input_value) > 1 and input_value.strip() != "":
+            self.html_full_content = input_value            
+        else:
+            print("Empty")
+        
+
     def evaluate_body_params(self, row):
         body_params = {}
-        for key, value in self.body_params.items():
-            if value.startswith("row['") and value.endswith("']"):
-                col_name = value[5:-2]
-                body_params[key] = row[col_name]
-            else:
-                body_params[key] = value
+        if self.body_params:
+            for key, value in self.body_params.items():
+                if value.startswith("row['") and value.endswith("']"):
+                    col_name = value[5:-2]
+                    body_params[key] = row[col_name]
+                else:
+                    body_params[key] = value
         return body_params
 
     def mail_preprocesser(self):
             error_mail_id = []
+            excel_header = pd.read_excel(self.excel_file_path,sheet_name="Sheet2")
+            excelfile_to_mail_header_list = excel_header.columns.tolist()
             for index, row in self.excel_file_df_to_mail.iterrows():
                     # print(f"To mail {index+1},{row[0]}, {row[1]}")
                     try:
                         for i, email_data in self.excel_file_df_from_mail.iterrows():
                             if email_data[0] not in error_mail_id:
+                                if "MailStatus" in excelfile_to_mail_header_list:
+                                    if row["MailStatus"] == "Completed":
+                                        continue
                                 try:
                                     print(index, row[0])
                                     recipient_email = row[0] # Assuming your Excel file has a column named 'Email'
@@ -328,12 +365,20 @@ class App(customtkinter.CTk):
                                                 receivers = [recipient_email],
                                                 html =self.html_full_content,
                                     body_params=self.evaluate_body_params(row),)
-                                    break
+                                    self.excel_file_df_to_mail['FromMail'] =  email_data[0] 
+                                    self.excel_file_df_to_mail['MailStatus'] =  "Completed"
+                                    break  
                                 except Exception as e:
                                     error_mail_id.append(email_data[0])
                                     print(f"{email_data[0]} added to error list")
                     except Exception as e:
                         print(e)
+
+            # Step 2: Create an ExcelWriter object
+            with pd.ExcelWriter(self.excel_file_path, engine='openpyxl') as writer:
+                # Write each DataFrame to a different sheet
+                self.excel_file_df_from_mail.to_excel(writer, sheet_name='Sheet1', index=False)
+                self.excel_file_df_to_mail.to_excel(writer, sheet_name='Sheet2', index=False)         
            
     def start_email(self):
         # Need to set the try catch methods
