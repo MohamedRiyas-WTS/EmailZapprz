@@ -7,6 +7,9 @@ import pandas as pd
 from redmail import gmail
 import customtkinter
 import re
+import webview
+from tkinter import ttk
+from tkinter import scrolledtext
 
 
 
@@ -91,19 +94,19 @@ class App(customtkinter.CTk):
 
         self.dynamic_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.dynamic_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.dynamic_frame.grid_rowconfigure(1, weight=1)  # Allows the textbox row to expand
 
         self.static_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.static_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
-
         self.static_frame.grid_forget()
         
         self.textbox_dynamic = customtkinter.CTkTextbox(self.dynamic_frame, width=700,fg_color="grey",text_color="white", height=340)
-        self.textbox_dynamic.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
+        self.textbox_dynamic.grid(row=1, column=0, columnspan=3, padx=(40, 40), pady=(10, 10), sticky="nsew")
         self.textbox_dynamic.insert("2.0","Html Code goes here.../ Upload the html file")
         self.textbox_dynamic.bind("<FocusIn>",self.clear_placeholder)
         
         self.textbox_static = customtkinter.CTkTextbox(self.static_frame, width=700,fg_color="grey",text_color="white", height=340)
-        self.textbox_static.grid(row=0, column=1, padx=(40, 0), pady=(10,140))
+        self.textbox_static.grid(row=1, column=0, columnspan=3, padx=(40, 40), pady=(10, 10), sticky="nsew")
         self.textbox_static.insert("2.0","Html Code goes here.../ Upload the html file")
         self.textbox_static.bind("<FocusIn>",self.clear_placeholder)
         # self.tabview = customtkinter.CTkTabview(self.second_frame, width=700,height=450,corner_radius=50)
@@ -113,20 +116,25 @@ class App(customtkinter.CTk):
         # self.tabview.tab("Static").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
         # self.tabview.tab("Dynamic").grid_columnconfigure(2, weight=1)
         self.dynamic_upload_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_html_file)
-        self.dynamic_upload_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
+        self.dynamic_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
         self.dynamic_sub_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_custom_file)
-        self.dynamic_sub_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
+        self.dynamic_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
-        self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
+        self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
+
+
+
+
         self.static_upload_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_html_file)
-        self.static_upload_button.grid(row=0, column=1,columnspan=2, padx=(600,0), pady=(279, 10)) 
+        self.static_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
         self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_custom_file)
-        self.static_sub_button.grid(row=0, column=1,columnspan=2, padx=(80, 10), pady=(400,10))
+        self.static_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
-        self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 150), pady=(365, 95), sticky="nsew")
+        self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
         self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.list_frame.grid_forget()
+        
 
     def clear_placeholder(self, event): # function for clearing the place holder
         if self.textbox_dynamic.get("1.0", "end-1c") == "Html Code goes here.../ Upload the html file":
@@ -188,11 +196,67 @@ class App(customtkinter.CTk):
             # Bind the entry widget to the callback function
             entry_dynamic.bind("<KeyRelease>", lambda event, e=entry_dynamic, c=context_list: self.on_entry_change(e, c))
         self.submit_list_button = customtkinter.CTkButton(self.list_frame, corner_radius=30, text="Submit",
-                                                         fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.dynamic_submit_button)
-        self.submit_list_button.grid(row=1, column=1, columnspan=2, rowspan=2, pady=(350, 10))
+                                                         fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.dynamic_submit_button)
+        self.submit_list_button.grid(row=1, column=1, columnspan=2, rowspan=2,padx=(350,10), pady=(350, 10))
+        self.dynamic_back_button = CTkButton(self.list_frame,corner_radius=30, text="Back",
+                                                         fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.dynamic_back_button_function)
+        self.dynamic_back_button.grid(row=1, column=2,columnspan=2, rowspan=2,padx=(10,350), pady=(350,10))
+
+        # create preview frame==>dummy frame created for future use
+        self.preview_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="grey")
+        self.preview_frame.grid_columnconfigure(0, weight=1)
+        self.preview_frame.grid_rowconfigure(1, weight=1)
+        
+
+
+    def dynamic_back_button_function(self):
+        self.list_frame.grid_forget()
+        self.change_segment_event("Dynamic")
+
+
+    def static_preview_frame_function(self):
+        self.webview_window  = None
+        html_code = self.html_full_content
+        if not html_code.startswith("<!DOCTYPE html>"):
+            html_code = f"<!DOCTYPE html><html><body>{html_code}</body></html>"
+
+        if self.webview_window:
+            self.webview_window.destroy()
+        
+        # Create a webview window to display HTML content
+        self.webview_window = webview.create_window("HTML Preview", html=html_code)
+        webview.start()
+
+    def dynamic_preview_frame_function(self):
+        html_code = self.html_full_content
+        self.webview_window  = None
+        if not html_code.startswith("<!DOCTYPE html>"):
+            html_code = f"<!DOCTYPE html><html><body>{html_code}</body></html>"
+
+        values = None
+        for index, row in self.excel_file_df_to_mail.iterrows():
+            values = self.evaluate_body_params(row)
+            break
+
+        # Replace placeholders with actual values
+        for key, value in values.items():
+            # Replace {{key}} with actual value
+            html_code = html_code.replace(f"{{{{{key}}}}}", str(value))
+
+        # If the webview window is already open, close it before reopening
+        if self.webview_window:
+            self.webview_window.destroy()
+        
+        # Create a webview window to display HTML content
+        self.webview_window = webview.create_window("HTML Preview", html=html_code)
+        webview.start()
 
     def dynamic_submit_button(self):
         self.body_params = self.get_entry_data()
+        self.preview_frame.configure(corner_radius=0)
+        self.preview_frame.grid_columnconfigure(0, weight=1)
+        self.preview_frame.grid_rowconfigure(1, weight=1)
+        self.dynamic_preview_frame_function()
         
         
     def on_entry_change(self, entry, combo_box):
@@ -276,7 +340,7 @@ class App(customtkinter.CTk):
                         file_content = html_content.read()
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
-                params_variable= re.findall("\{\{(\w+)\}\}",str(file_content_str))
+                params_variable= re.findall(r"\{\{(\w+)\}\}",str(file_content_str))
                 if params_variable:
                     if self.excel_file_to_mail_header_list:
                         self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
@@ -290,10 +354,11 @@ class App(customtkinter.CTk):
            messagebox.showwarning("No File", "Please select an Html/Text file.")
         
     def upload_custom_file(self):
+        
         input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
         if len(input_value) > 1 and input_value.strip() != "":
             self.html_full_content = input_value
-            params_variable = re.findall("\{\{(\w+)\}\}",input_value)
+            params_variable = re.findall(r"\{\{(\w+)\}\}",input_value)
             if params_variable:
                 if self.excel_file_to_mail_header_list:
                     self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
@@ -319,6 +384,7 @@ class App(customtkinter.CTk):
                         file_content = html_content.read()
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
+                self.static_preview_frame_function() 
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
@@ -328,7 +394,8 @@ class App(customtkinter.CTk):
         input_value = self.textbox_static.get("1.0", "end")  # Get text from textbox
         
         if len(input_value) > 1 and input_value.strip() != "":
-            self.html_full_content = input_value            
+            self.html_full_content = input_value
+            self.static_preview_frame_function()         
         else:
             print("Empty")
         
@@ -344,7 +411,7 @@ class App(customtkinter.CTk):
                     body_params[key] = value
         return body_params
 
-    def mail_preprocesser(self):
+    def mail_processer(self):
             error_mail_id = []
             excel_header = pd.read_excel(self.excel_file_path,sheet_name="Sheet2")
             excelfile_to_mail_header_list = excel_header.columns.tolist()
@@ -352,25 +419,25 @@ class App(customtkinter.CTk):
                     # print(f"To mail {index+1},{row[0]}, {row[1]}")
                     try:
                         for i, email_data in self.excel_file_df_from_mail.iterrows():
-                            if email_data[0] not in error_mail_id:
+                            if email_data.iloc[0] not in error_mail_id:
                                 if "MailStatus" in excelfile_to_mail_header_list:
                                     if row["MailStatus"] == "Completed":
                                         continue
                                 try:
-                                    print(index, row[0])
-                                    recipient_email = row[0] # Assuming your Excel file has a column named 'Email'
-                                    gmail.username =   email_data[0]# Notification mail sent to registered mail of customer
-                                    gmail.password = email_data[1]
+                                    print(index, row.iloc[0])
+                                    recipient_email = row.iloc[0] # Assuming your Excel file has a column named 'Email'
+                                    gmail.username =   email_data.iloc[0]# Notification mail sent to registered mail of customer
+                                    gmail.password = email_data.iloc[1]
                                     gmail.send(subject = "Checking subject4",
                                                 receivers = [recipient_email],
                                                 html =self.html_full_content,
                                     body_params=self.evaluate_body_params(row),)
-                                    self.excel_file_df_to_mail['FromMail'] =  email_data[0] 
+                                    self.excel_file_df_to_mail['FromMail'] =  email_data.iloc[0] 
                                     self.excel_file_df_to_mail['MailStatus'] =  "Completed"
                                     break  
                                 except Exception as e:
-                                    error_mail_id.append(email_data[0])
-                                    print(f"{email_data[0]} added to error list")
+                                    error_mail_id.append(email_data.iloc[0])
+                                    print(f"{email_data.iloc[0]} added to error list")
                     except Exception as e:
                         print(e)
 
@@ -382,7 +449,7 @@ class App(customtkinter.CTk):
            
     def start_email(self):
         # Need to set the try catch methods
-        self.mail_preprocesser()
+        self.mail_processer()
 
 if __name__ == "__main__":
     app = App()
