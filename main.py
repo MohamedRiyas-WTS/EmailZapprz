@@ -4,12 +4,15 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
-from redmail import gmail
+from redmail import gmail, EmailSender
 import customtkinter
 import re
 import webview
 from tkinter import ttk
 from tkinter import scrolledtext
+from pathlib import Path
+import os
+from CTkMessagebox import CTkMessagebox
 
 
 
@@ -24,6 +27,7 @@ class App(customtkinter.CTk):
         self.excel_file_to_mail_header_list = []
         self.scrollable_frame_switches = []
         self.title("EmailZapprz")
+        self.static_attachment_file_path_list = []
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
         # Disable window resizing
@@ -131,10 +135,63 @@ class App(customtkinter.CTk):
         self.static_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
+
+        self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
+        self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.subject_attach_frame.grid_rowconfigure(1, weight=1)  
+        self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=CTkFont(family="times", size=20, weight="bold"), height=40)
+        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(10, 10), sticky="ew")
+
+        self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
+        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(10, 10), sticky="ew")
+
+        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
+        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+
+        self.attachment_files = CTkButton(self.subject_attach_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_attach_files_function)
+        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 10))
+
+        self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
+        self.attachment_sub_button.grid(row=2, column=1)
+        self.attachment_back_button = CTkButton(self.subject_attach_frame,corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
+        self.attachment_back_button.grid(row=2, column=0)
+
+        self.subject_attach_frame.grid_columnconfigure(0, weight=0)
+        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
+
+        self.subject_attach_frame.grid_forget()
+
+
         self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.list_frame.grid_forget()
-        
+
+    def attachment_back_function(self):
+        self.subject_attach_frame.grid_forget()
+        self.dynamic_frame.configure(corner_radius=16)
+        self.dynamic_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.seg_button_1.configure(state=customtkinter.NORMAL)
+
+    def list_frame_show_call(self):
+        params_variable = re.findall(r"\{\{(\w+)\}\}",self.html_full_content)
+        if params_variable:
+            if self.excel_file_to_mail_header_list:
+                self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
+            else:
+                print("Empty header list")
+        else:
+            print("Empty params variable list")
+
+    def attachment_sub_function(self):
+        if len(self.subject_entry.get()) > 1 and self.subject_entry.get().strip() != "":                
+            self.list_frame_show_call()
+        else:
+            msg_closing = CTkMessagebox(title="Email Subject is empty!", message="Do you want to continue?",
+                        icon="question", option_1="No", option_2="Yes")
+            response = msg_closing.get()
+            if response=="Yes":
+                self.list_frame_show_call()
+            
 
     def clear_placeholder(self, event): # function for clearing the place holder
         if self.textbox_dynamic.get("1.0", "end-1c") == "Html Code goes here.../ Upload the html file":
@@ -167,10 +224,28 @@ class App(customtkinter.CTk):
                 data_dict[key] = f"row['{combo_value}']"
         
         return data_dict
+    
+    def sub_attach_function(self):
+        print("Attach entry")
+        self.static_frame.grid_forget()
+        self.dynamic_frame.grid_forget()
+        # self.list_frame.grid_forget()
+        self.subject_attach_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
+        self.subject_attach_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ew")
+
+        # params_variable= re.findall(r"\{\{(\w+)\}\}",str(self.html_full_content))
+        # if params_variable:
+        #     if self.excel_file_to_mail_header_list:
+        #         self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
+        #     else:
+        #         print("Empty header list")
+        # else:
+        #     print("Empty params variable list")
 
     def list_frame_show(self,params_variable, params_name):
         self.static_frame.grid_forget()
         self.dynamic_frame.grid_forget()
+        self.subject_attach_frame.grid_forget()
         self.list_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
         self.list_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ew")
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self.list_frame, label_text="Email Mapping",height=350,width=700)
@@ -211,7 +286,9 @@ class App(customtkinter.CTk):
 
     def dynamic_back_button_function(self):
         self.list_frame.grid_forget()
-        self.change_segment_event("Dynamic")
+        self.subject_attach_frame.configure(corner_radius=16)
+        self.subject_attach_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="nwes")
+        # self.change_segment_event("Dynamic")
 
 
     def static_preview_frame_function(self):
@@ -302,6 +379,23 @@ class App(customtkinter.CTk):
     def change_appearance_mode_event(self, new_appearance_mode):
         # Apperance Mode
         customtkinter.set_appearance_mode(new_appearance_mode)
+    
+
+    def static_attach_files_function(self):
+        file_path = filedialog.askopenfilenames(
+            title="Select files upto 25MB"
+        )
+        total_file_size = 0.0
+        for file in file_path:
+            file_size = os.path.getsize(file)
+            total_file_size += file_size
+        if total_file_size >= 26000000:
+            messagebox.showwarning("Error",f"Please select the file size upto 25MB\nYour selected file size:{total_file_size/1048576:.2f}MB")
+        else:
+            messagebox.showinfo("File Selected", "Successfully uploaded")
+            self.static_attachment_file_path_list = list(file_path)
+                
+            
 
     def upload_file(self):
         file_path = filedialog.askopenfilename(
@@ -340,14 +434,9 @@ class App(customtkinter.CTk):
                         file_content = html_content.read()
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
-                params_variable= re.findall(r"\{\{(\w+)\}\}",str(file_content_str))
-                if params_variable:
-                    if self.excel_file_to_mail_header_list:
-                        self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
-                    else:
-                        print("Empty header list")
-                else:
-                    print("Empty params variable list")
+                self.seg_button_1.configure(state=customtkinter.DISABLED)
+                self.dynamic_frame.grid_forget()
+                self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
@@ -357,15 +446,8 @@ class App(customtkinter.CTk):
         
         input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
         if len(input_value) > 1 and input_value.strip() != "":
+            self.seg_button_1.configure(state=customtkinter.DISABLED)
             self.html_full_content = input_value
-            params_variable = re.findall(r"\{\{(\w+)\}\}",input_value)
-            if params_variable:
-                if self.excel_file_to_mail_header_list:
-                    self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
-                else:
-                    print("Empty header list")
-            else:
-                print("Empty params variable list")
         else:
             print("Empty")
 
@@ -384,6 +466,7 @@ class App(customtkinter.CTk):
                         file_content = html_content.read()
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
+                self.seg_button_1.configure(state=customtkinter.DISABLED)
                 self.static_preview_frame_function() 
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
@@ -395,6 +478,7 @@ class App(customtkinter.CTk):
         
         if len(input_value) > 1 and input_value.strip() != "":
             self.html_full_content = input_value
+            self.seg_button_1.configure(state=customtkinter.DISABLED)
             self.static_preview_frame_function()         
         else:
             print("Empty")
@@ -431,7 +515,10 @@ class App(customtkinter.CTk):
                                     gmail.send(subject = "Checking subject4",
                                                 receivers = [recipient_email],
                                                 html =self.html_full_content,
-                                    body_params=self.evaluate_body_params(row),)
+                                    body_params=self.evaluate_body_params(row),
+
+                                    attachments=self.static_attachment_file_path_list)
+
                                     self.excel_file_df_to_mail['FromMail'] =  email_data.iloc[0] 
                                     self.excel_file_df_to_mail['MailStatus'] =  "Completed"
                                     break  
