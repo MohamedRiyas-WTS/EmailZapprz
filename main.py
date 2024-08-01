@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
-from redmail import gmail, EmailSender
+from redmail import gmail
 import customtkinter
 import re
 import webview
@@ -13,9 +13,10 @@ from tkinter import scrolledtext
 from pathlib import Path
 import os
 from CTkMessagebox import CTkMessagebox
+import openpyxl
 
 
-#
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -27,9 +28,12 @@ class App(customtkinter.CTk):
         self.excel_file_to_mail_header_list = []
         self.scrollable_frame_switches = []
         self.title("EmailZapprz")
-        self.static_attachment_file_path_list = []
+        self.attachment_file_path_list = []
+        self.static_attachment_file_count = 0
         self.html_state = ["Dynamic","Static"]
         self.current_html_state = None
+        self.individual_attachments_header = []
+        self.email_subject = ""
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
         # Disable window resizing
@@ -132,8 +136,6 @@ class App(customtkinter.CTk):
         self.entry_dynamic.bind("<KeyRelease>",lambda event: self.clear_textbox_dynomic())
 
 
-
-
         self.static_upload_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_html_file)
         self.static_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
         self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_custom_file)
@@ -146,16 +148,20 @@ class App(customtkinter.CTk):
         self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ns")
         self.subject_attach_frame.grid_rowconfigure(1, weight=1)  
         self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(50, 10), sticky="ew")
+        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(20, 10), sticky="ew")
 
         self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
-        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(50, 10), sticky="ew")
+        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(20, 10), sticky="ew")
 
         self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 50), sticky="ew")
+        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 230), sticky="ew")
 
         self.attachment_files = CTkButton(self.subject_attach_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_attach_files_function)
-        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 50))
+        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 230))
+
+        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame, label_text="Individual Attachment",width=10,height=50)
+        self.dynamic_scroll_checkbox_frame.grid(row=1, column=1,padx=(1,10), pady=(100,10), sticky="ew")
+        self.dynamic_scrollable_frame_checkbox = []
 
         self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
         self.attachment_sub_button.grid(row=2, column=1,pady=(10, 50))
@@ -189,7 +195,8 @@ class App(customtkinter.CTk):
             self.static_preview_frame_function()
 
     def attachment_sub_function(self):
-        if len(self.subject_entry.get()) > 1 and self.subject_entry.get().strip() != "":                
+        self.email_subject = self.subject_entry.get()
+        if len(self.subject_entry.get()) >= 1 and self.subject_entry.get().strip() != "":                
             self.list_frame_show_call()
         else:
             msg_closing = CTkMessagebox(title="Email Subject is empty!", message="Do you want to continue?",
@@ -230,6 +237,13 @@ class App(customtkinter.CTk):
         
         return data_dict
     
+    def get_checkbox_values(self):
+        data_dict = []
+        for checkbox in self.dynamic_scrollable_frame_checkbox:
+            if checkbox.get() == 1:
+                data_dict.append(checkbox.cget("text"))
+        self.individual_attachments_header = data_dict 
+    
     def sub_attach_function(self):
         print("Attach entry")
         self.static_frame.grid_forget()
@@ -237,6 +251,16 @@ class App(customtkinter.CTk):
         # self.list_frame.grid_forget()
         self.subject_attach_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
         self.subject_attach_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ns")
+
+        for index, key in enumerate(self.excel_file_to_mail_header_list):
+            # switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"CTkSwitch {i}")
+            # switch.grid(row=i, column=0, padx=10, pady=(0, 20))
+            # self.scrollable_frame_switches.append(switch)
+            checkbox = customtkinter.CTkCheckBox(master=self.dynamic_scroll_checkbox_frame,text=key)
+            checkbox.grid(row=index, column=0, pady=20, padx=20, sticky="w")
+            self.dynamic_scrollable_frame_checkbox.append(checkbox)
+        self.dynamic_scroll_checkbox_submit = customtkinter.CTkButton(self.subject_attach_frame, text="Submit",width=10, command=self.get_checkbox_values)
+        self.dynamic_scroll_checkbox_submit.grid(row=3, column=0, padx=(200, 0), pady=(20, 20), sticky="nsew")
 
         # params_variable= re.findall(r"\{\{(\w+)\}\}",str(self.html_full_content))
         # if params_variable:
@@ -404,9 +428,10 @@ class App(customtkinter.CTk):
             messagebox.showwarning("Error",f"Please select the file size upto 25MB\nYour selected file size:{total_file_size/1048576:.2f}MB")
         else:
             messagebox.showinfo("File Selected", "Successfully uploaded")
-            self.static_attachment_file_path_list = list(file_path)
-                
-            
+            for static_path in file_path:
+                if os.path.exists(static_path):
+                    self.attachment_file_path_list.append(static_path)
+            self.static_attachment_file_count = len(self.attachment_file_path_list)            
 
     def upload_file(self):
         file_path = filedialog.askopenfilename(
@@ -536,16 +561,18 @@ class App(customtkinter.CTk):
                                         continue
                                 try:
                                     print(index, row.iloc[0])
+                                    for path in self.individual_attachments_header:
+                                        if os.path.exists(rf"{row[path]}"):
+                                            self.attachment_file_path_list.append(rf"{row[path]}")
                                     recipient_email = row.iloc[0] # Assuming your Excel file has a column named 'Email'
                                     gmail.username =   email_data.iloc[0]# Notification mail sent to registered mail of customer
                                     gmail.password = email_data.iloc[1]
-                                    gmail.send(subject = "Checking subject4",
+                                    gmail.send(subject = self.email_subject,
                                                 receivers = [recipient_email],
                                                 html =self.html_full_content,
                                     body_params=self.evaluate_body_params(row),
-
-                                    attachments=self.static_attachment_file_path_list)
-
+                                    attachments=self.attachment_file_path_list)
+                                    self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
                                     self.excel_file_df_to_mail['FromMail'] =  email_data.iloc[0] 
                                     self.excel_file_df_to_mail['MailStatus'] =  "Completed"
                                     break  
