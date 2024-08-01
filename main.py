@@ -110,11 +110,13 @@ class App(customtkinter.CTk):
         self.textbox_dynamic.grid(row=1, column=0, columnspan=3, padx=(40, 40), pady=(10, 10), sticky="nsew")
         self.textbox_dynamic.insert("2.0","Html Code goes here.../ Upload the html file")
         self.textbox_dynamic.bind("<FocusIn>",self.clear_placeholder)
+        self.textbox_dynamic.bind("<KeyRelease>",lambda event: self.clear_entry_text())
         
         self.textbox_static = customtkinter.CTkTextbox(self.static_frame, width=700,fg_color="grey",text_color="white", height=340)
         self.textbox_static.grid(row=1, column=0, columnspan=3, padx=(40, 40), pady=(10, 10), sticky="nsew")
         self.textbox_static.insert("2.0","Html Code goes here.../ Upload the html file")
         self.textbox_static.bind("<FocusIn>",self.clear_placeholder)
+        self.textbox_static.bind("<KeyRelease>",lambda event: self.clear_entry_text_static())
         # self.tabview = customtkinter.CTkTabview(self.second_frame, width=700,height=450,corner_radius=50)
         # self.tabview.grid(row=0, column=1, padx=(65, 0), pady=(50,100), sticky="nsew")
         # self.tabview.add("Static")
@@ -127,6 +129,7 @@ class App(customtkinter.CTk):
         self.dynamic_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
         self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
+        self.entry_dynamic.bind("<KeyRelease>",lambda event: self.clear_textbox_dynomic())
 
 
 
@@ -137,6 +140,7 @@ class App(customtkinter.CTk):
         self.static_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
+        self.entry_static.bind("<KeyRelease>",lambda event: self.clear_textbox_static())
 
         self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ns")
@@ -192,8 +196,7 @@ class App(customtkinter.CTk):
                         icon="question", option_1="No", option_2="Yes")
             response = msg_closing.get()
             if response=="Yes":
-                self.list_frame_show_call()
-            
+                self.list_frame_show_call()      
 
     def clear_placeholder(self, event): # function for clearing the place holder
         if self.textbox_dynamic.get("1.0", "end-1c") == "Html Code goes here.../ Upload the html file":
@@ -283,15 +286,19 @@ class App(customtkinter.CTk):
         self.preview_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="grey")
         self.preview_frame.grid_columnconfigure(0, weight=1)
         self.preview_frame.grid_rowconfigure(1, weight=1)
-        
 
+    def clear_entry_text_static(self):
+        self.entry_static.delete(0,"end")  
+    def clear_textbox_dynomic(self):
+        self.textbox_dynamic.delete(1.0,"end")
 
+    def clear_textbox_static(self):
+        self.textbox_static.delete(1.0,"end")
     def dynamic_back_button_function(self):
         self.list_frame.grid_forget()
         self.subject_attach_frame.configure(corner_radius=16)
         self.subject_attach_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="nwes")
         # self.change_segment_event("Dynamic")
-
 
     def static_preview_frame_function(self):
         self.webview_window  = None
@@ -382,6 +389,8 @@ class App(customtkinter.CTk):
         # Apperance Mode
         customtkinter.set_appearance_mode(new_appearance_mode)
     
+    def clear_entry_text(self,event=None):
+        self.entry_dynamic.delete(0,"end")
 
     def static_attach_files_function(self):
         file_path = filedialog.askopenfilenames(
@@ -407,6 +416,7 @@ class App(customtkinter.CTk):
         if file_path:
         # You can add the logic to process the Excel file here
             try:
+                
                 self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
                 self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
                 self.excel_file_path = file_path
@@ -422,12 +432,14 @@ class App(customtkinter.CTk):
            messagebox.showwarning("No File", "Please select an Excel file.")
 
     def upload_html_file(self):
+        self.entry_dynamic.delete(0,"end")
         file_path = filedialog.askopenfilename(
         filetypes=[("Html files", "*.html *.htm *.txt")],
         title="Select an Excel file"
         )
         if file_path:
-                messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+                self.entry_dynamic.insert(0,file_path)
+                self.textbox_dynamic.delete(1.0,"end")
                 if re.search(".txt$",file_path):
                     with open(file_path,"r") as html_content:
                         file_content_str= html_content.read()   
@@ -437,9 +449,9 @@ class App(customtkinter.CTk):
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
-                self.dynamic_frame.grid_forget()
+                #self.dynamic_frame.grid_forget()
                 self.current_html_state = self.html_state[0]
-                self.sub_attach_function()
+                #self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
@@ -458,12 +470,15 @@ class App(customtkinter.CTk):
             print("Empty")
 
     def upload_static_html_file(self):
+        
         file_path = filedialog.askopenfilename(
         filetypes=[("Html files", "*.html *.htm *.txt")],
         title="Select an Excel file"
         )
         if file_path:
-                messagebox.showinfo("File Selected", f"Successfully uploaded: {file_path}")
+                self.entry_dynamic.delete(0,"end")
+                self.entry_static.insert(0,file_path)
+                self.textbox_static.delete(1.0,"end")
                 if re.search(".txt$",file_path):
                     with open(file_path,"r") as html_content:
                         file_content_str= html_content.read()   
@@ -473,9 +488,9 @@ class App(customtkinter.CTk):
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
-                self.dynamic_frame.grid_forget()
+                # self.dynamic_frame.grid_forget()
                 self.current_html_state = self.html_state[1]
-                self.sub_attach_function()
+                #self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
@@ -493,6 +508,8 @@ class App(customtkinter.CTk):
         else:
             print("Empty")
         
+    # def clear_text(self):
+    #     self.entry_dynamic.delete(1)
 
     def evaluate_body_params(self, row):
         body_params = {}
