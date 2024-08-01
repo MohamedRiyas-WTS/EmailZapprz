@@ -451,6 +451,9 @@ class App(customtkinter.CTk):
         if len(input_value) > 1 and input_value.strip() != "":
             self.seg_button_1.configure(state=customtkinter.DISABLED)
             self.html_full_content = input_value
+            self.dynamic_frame.grid_forget()
+            self.current_html_state = self.html_state[0]
+            self.sub_attach_function()
         else:
             print("Empty")
 
@@ -484,7 +487,9 @@ class App(customtkinter.CTk):
         if len(input_value) > 1 and input_value.strip() != "":
             self.html_full_content = input_value
             self.seg_button_1.configure(state=customtkinter.DISABLED)
-            self.static_preview_frame_function()         
+            self.dynamic_frame.grid_forget()
+            self.current_html_state = self.html_state[1]
+            self.sub_attach_function()
         else:
             print("Empty")
         
