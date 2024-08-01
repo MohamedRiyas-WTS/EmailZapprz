@@ -28,6 +28,8 @@ class App(customtkinter.CTk):
         self.scrollable_frame_switches = []
         self.title("EmailZapprz")
         self.static_attachment_file_path_list = []
+        self.html_state = ["Dynamic","Static"]
+        self.current_html_state = None
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
         # Disable window resizing
@@ -137,24 +139,24 @@ class App(customtkinter.CTk):
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
 
         self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
-        self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ns")
         self.subject_attach_frame.grid_rowconfigure(1, weight=1)  
         self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(10, 10), sticky="ew")
+        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(50, 10), sticky="ew")
 
         self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
-        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(10, 10), sticky="ew")
+        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(50, 10), sticky="ew")
 
         self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 50), sticky="ew")
 
         self.attachment_files = CTkButton(self.subject_attach_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_attach_files_function)
-        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 10))
+        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 50))
 
         self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
-        self.attachment_sub_button.grid(row=2, column=1)
+        self.attachment_sub_button.grid(row=2, column=1,pady=(10, 50))
         self.attachment_back_button = CTkButton(self.subject_attach_frame,corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
-        self.attachment_back_button.grid(row=2, column=0)
+        self.attachment_back_button.grid(row=2, column=0,pady=(10, 50))
 
         self.subject_attach_frame.grid_columnconfigure(0, weight=0)
         self.subject_attach_frame.grid_columnconfigure(1, weight=1)
@@ -174,13 +176,13 @@ class App(customtkinter.CTk):
 
     def list_frame_show_call(self):
         params_variable = re.findall(r"\{\{(\w+)\}\}",self.html_full_content)
-        if params_variable:
+        if params_variable and self.current_html_state == self.html_state[0]:
             if self.excel_file_to_mail_header_list:
                 self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
             else:
                 print("Empty header list")
         else:
-            print("Empty params variable list")
+            self.static_preview_frame_function()
 
     def attachment_sub_function(self):
         if len(self.subject_entry.get()) > 1 and self.subject_entry.get().strip() != "":                
@@ -231,7 +233,7 @@ class App(customtkinter.CTk):
         self.dynamic_frame.grid_forget()
         # self.list_frame.grid_forget()
         self.subject_attach_frame.configure(corner_radius=16, fg_color="white",width=500,height=500)
-        self.subject_attach_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ew")
+        self.subject_attach_frame.grid(row=1, column=0,  padx=(20, 20), pady=(20, 20), sticky="ns")
 
         # params_variable= re.findall(r"\{\{(\w+)\}\}",str(self.html_full_content))
         # if params_variable:
@@ -436,6 +438,7 @@ class App(customtkinter.CTk):
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
                 self.dynamic_frame.grid_forget()
+                self.current_html_state = self.html_state[0]
                 self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
@@ -467,7 +470,9 @@ class App(customtkinter.CTk):
                     file_content_str = file_content.decode('utf-8')
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
-                self.static_preview_frame_function() 
+                self.dynamic_frame.grid_forget()
+                self.current_html_state = self.html_state[1]
+                self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
