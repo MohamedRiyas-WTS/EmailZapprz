@@ -129,7 +129,7 @@ class App(customtkinter.CTk):
         # self.tabview.tab("Dynamic").grid_columnconfigure(2, weight=1)
         self.dynamic_upload_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_html_file)
         self.dynamic_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
-        self.dynamic_sub_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_custom_file)
+        self.dynamic_sub_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.dynamic_sub_button_func)
         self.dynamic_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_dynamic = customtkinter.CTkEntry(self.dynamic_frame, placeholder_text="Upload....")
         self.entry_dynamic.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
@@ -138,15 +138,17 @@ class App(customtkinter.CTk):
 
         self.static_upload_button=CTkButton(self.static_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_html_file)
         self.static_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
-        self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.upload_static_custom_file)
+        self.static_sub_button=CTkButton(self.static_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_sub_button_func)
         self.static_sub_button.grid(row=2, column=1, columnspan=2, padx=(40, 300), pady=(10, 10), sticky="ew")
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
         self.entry_static.bind("<KeyRelease>",lambda event: self.clear_textbox_static())
 
+        """
         self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ns")
-        self.subject_attach_frame.grid_rowconfigure(1, weight=1)  
+        self.subject_attach_frame.grid_rowconfigure(1, weight=1)
+        self.subject_attach_frame.grid_columnconfigure(1, weight=1)  
         self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=CTkFont(family="times", size=20, weight="bold"), height=40)
         self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(20, 10), sticky="ew")
 
@@ -157,16 +159,19 @@ class App(customtkinter.CTk):
         self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 230), sticky="ew")
 
         self.attachment_files = CTkButton(self.subject_attach_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_attach_files_function)
-        self.attachment_files.grid(row=1, column=1, padx=(10, 460), pady=(10, 230))
+        self.attachment_files.grid(row=1, column=1, padx=(10, 350), pady=(1, 220))
 
-        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame, label_text="Individual Attachment",width=10,height=50)
-        self.dynamic_scroll_checkbox_frame.grid(row=1, column=1,padx=(1,10), pady=(100,10), sticky="ew")
+        self.individual_attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Individual Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
+        self.individual_attach_label.grid(row=1, column=0, padx=(40, 10), pady=(0,0))
+
+        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame, label_text="Select Below columns",width=10,height=50)
+        self.dynamic_scroll_checkbox_frame.grid(row=1, column=1,padx=(1,330), pady=(100,0))
         self.dynamic_scrollable_frame_checkbox = []
 
         self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
-        self.attachment_sub_button.grid(row=2, column=1,pady=(10, 50))
+        self.attachment_sub_button.grid(row=2, column=1,padx=(300,0), pady=(30, 10))
         self.attachment_back_button = CTkButton(self.subject_attach_frame,corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
-        self.attachment_back_button.grid(row=2, column=0,pady=(10, 50))
+        self.attachment_back_button.grid(row=2, column=0,pady=(30, 10))
 
         self.subject_attach_frame.grid_columnconfigure(0, weight=0)
         self.subject_attach_frame.grid_columnconfigure(1, weight=1)
@@ -177,6 +182,47 @@ class App(customtkinter.CTk):
         self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
         self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.list_frame.grid_forget()
+"""
+
+        self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white", width=700,height=500)
+        self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.subject_attach_frame.grid_rowconfigure(1, weight=1)
+        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
+
+        self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=customtkinter.CTkFont(family="times", size=20, weight="bold"), height=40)
+        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(20, 10), sticky="ew")
+
+        self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
+        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(20, 10), sticky="ew")
+
+        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=customtkinter.CTkFont(family="times", size=20, weight="bold"), height=40)
+        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+
+        self.attachment_files = customtkinter.CTkButton(self.subject_attach_frame, text="Upload",font=customtkinter.CTkFont(family="times", size=20, weight="bold"),hover_color='#808080', fg_color='#3b8ed0', height=10,text_color="#1c1c1c", corner_radius=10,command=self.static_attach_files_function)
+        self.attachment_files.grid(row=1, column=1, padx=(10, 10), pady=(10, 10), sticky="ew")
+
+        self.individual_attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Individual Attachments",font=customtkinter.CTkFont(family="times", size=18, weight="bold"), height=40)
+        self.individual_attach_label.grid(row=2, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+
+        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame,label_text="Select Below columns", width=500,height=200)
+        self.dynamic_scroll_checkbox_frame.grid(row=2, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+        self.dynamic_scrollable_frame_checkbox = []
+
+        self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2,text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
+        self.attachment_sub_button.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="e")
+
+        self.attachment_back_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2,text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
+        self.attachment_back_button.grid(row=3, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
+
+        self.subject_attach_frame.grid_columnconfigure(0, weight=1)
+        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
+
+        self.subject_attach_frame.grid_forget()
+
+        self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white", width=700, height=500)
+        self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
+        self.list_frame.grid_forget()
+        
 
     def attachment_back_function(self):
         self.subject_attach_frame.grid_forget()
@@ -195,15 +241,16 @@ class App(customtkinter.CTk):
             self.static_preview_frame_function()
 
     def attachment_sub_function(self):
+        data_dict = []
+        for checkbox in self.dynamic_scrollable_frame_checkbox:
+            if checkbox.get() == 1:
+                data_dict.append(checkbox.cget("text"))
+        self.individual_attachments_header = data_dict
         self.email_subject = self.subject_entry.get()
         if len(self.subject_entry.get()) >= 1 and self.subject_entry.get().strip() != "":                
             self.list_frame_show_call()
         else:
-            msg_closing = CTkMessagebox(title="Email Subject is empty!", message="Do you want to continue?",
-                        icon="question", option_1="No", option_2="Yes")
-            response = msg_closing.get()
-            if response=="Yes":
-                self.list_frame_show_call()      
+            messagebox.showwarning("Error", "Please fill the email subject")
 
     def clear_placeholder(self, event): # function for clearing the place holder
         if self.textbox_dynamic.get("1.0", "end-1c") == "Html Code goes here.../ Upload the html file":
@@ -237,12 +284,12 @@ class App(customtkinter.CTk):
         
         return data_dict
     
-    def get_checkbox_values(self):
-        data_dict = []
-        for checkbox in self.dynamic_scrollable_frame_checkbox:
-            if checkbox.get() == 1:
-                data_dict.append(checkbox.cget("text"))
-        self.individual_attachments_header = data_dict 
+    # def get_checkbox_values(self):
+    #     data_dict = []
+    #     for checkbox in self.dynamic_scrollable_frame_checkbox:
+    #         if checkbox.get() == 1:
+    #             data_dict.append(checkbox.cget("text"))
+    #     self.individual_attachments_header = data_dict 
     
     def sub_attach_function(self):
         print("Attach entry")
@@ -257,10 +304,10 @@ class App(customtkinter.CTk):
             # switch.grid(row=i, column=0, padx=10, pady=(0, 20))
             # self.scrollable_frame_switches.append(switch)
             checkbox = customtkinter.CTkCheckBox(master=self.dynamic_scroll_checkbox_frame,text=key)
-            checkbox.grid(row=index, column=0, pady=20, padx=20, sticky="w")
+            checkbox.grid(row=index, column=0, pady=5, padx=20, sticky="w")
             self.dynamic_scrollable_frame_checkbox.append(checkbox)
-        self.dynamic_scroll_checkbox_submit = customtkinter.CTkButton(self.subject_attach_frame, text="Submit",width=10, command=self.get_checkbox_values)
-        self.dynamic_scroll_checkbox_submit.grid(row=3, column=0, padx=(200, 0), pady=(20, 20), sticky="nsew")
+        # self.dynamic_scroll_checkbox_submit = customtkinter.CTkButton(self.subject_attach_frame, text="Submit",width=10, command=self.get_checkbox_values)
+        # self.dynamic_scroll_checkbox_submit.grid(row=2, column=0, columnspan=2, padx=(280, 360), pady=(5, 120), sticky="nsew")
 
         # params_variable= re.findall(r"\{\{(\w+)\}\}",str(self.html_full_content))
         # if params_variable:
@@ -427,11 +474,12 @@ class App(customtkinter.CTk):
         if total_file_size >= 26000000:
             messagebox.showwarning("Error",f"Please select the file size upto 25MB\nYour selected file size:{total_file_size/1048576:.2f}MB")
         else:
-            messagebox.showinfo("File Selected", "Successfully uploaded")
             for static_path in file_path:
                 if os.path.exists(static_path):
                     self.attachment_file_path_list.append(static_path)
             self.static_attachment_file_count = len(self.attachment_file_path_list)            
+            if self.static_attachment_file_count > 0:
+                messagebox.showinfo("File Selected", "Successfully uploaded")
 
     def upload_file(self):
         file_path = filedialog.askopenfilename(
@@ -447,7 +495,6 @@ class App(customtkinter.CTk):
                 self.excel_file_path = file_path
                 excel_header = pd.read_excel(file_path,sheet_name="Sheet2")
                 self.excel_file_to_mail_header_list = excel_header.columns.tolist()
-                messagebox.showinfo("File Selected", "Excel file read successfully")
                 self.frame_2_button_event()
             except PermissionError:
                 messagebox.showwarning("Error",f"The file '{file_path}' is already open. Please close it and try again.")
@@ -475,24 +522,61 @@ class App(customtkinter.CTk):
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
                 #self.dynamic_frame.grid_forget()
-                self.current_html_state = self.html_state[0]
+                # self.current_html_state = self.html_state[0]
                 #self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
            messagebox.showwarning("No File", "Please select an Html/Text file.")
-        
-    def upload_custom_file(self):
-        
-        input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
-        if len(input_value) > 1 and input_value.strip() != "":
-            self.seg_button_1.configure(state=customtkinter.DISABLED)
-            self.html_full_content = input_value
-            self.dynamic_frame.grid_forget()
-            self.current_html_state = self.html_state[0]
-            self.sub_attach_function()
+
+    def dynamic_sub_button_func(self):
+        dynamic_text_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
+        dynamic_upload_value = self.entry_dynamic.get()
+        self.current_html_state = self.html_state[0]
+        # print(dynamic_upload_value)
+        # print(dynamic_text_value.strip())
+        # print(dynamic_text_value.strip()!= "")
+        # print(dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file")
+        if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
+            messagebox.showwarning("Error","Please enter a value/select the file")
         else:
-            print("Empty")
+            if dynamic_upload_value.strip() != "":
+                if os.path.exists(rf"{dynamic_upload_value.strip("\"")}"):
+                    self.sub_attach_function()
+                else:
+                    messagebox.showwarning("Error","File not found")
+            else:
+                self.html_full_content = dynamic_text_value
+                self.sub_attach_function()
+
+
+    def static_sub_button_func(self):
+        static_text_value = self.textbox_static.get("1.0", "end")
+        static_upload_value = self.entry_static.get()
+        self.current_html_state = self.html_state[1]
+        if (static_text_value.strip() == "" or static_text_value.strip() == "Html Code goes here.../ Upload the html file") and static_upload_value.strip() == "":
+            messagebox.showwarning("Error","Please enter a value/select the file")
+        else:
+            if static_upload_value.strip() != "":
+                if os.path.exists(rf"{static_upload_value.strip("\"")}"):
+                    self.sub_attach_function()
+                else:
+                    messagebox.showwarning("Error","File not found")
+            else:
+                self.html_full_content = static_text_value
+                self.sub_attach_function()
+        
+    # def upload_custom_file(self):
+        
+    #     input_value = self.textbox_dynamic.get("1.0", "end")  # Get text from textbox
+    #     if len(input_value) > 1 and input_value.strip() != "":
+    #         self.seg_button_1.configure(state=customtkinter.DISABLED)
+    #         self.html_full_content = input_value
+    #         self.dynamic_frame.grid_forget()
+    #         self.current_html_state = self.html_state[0]
+    #         self.sub_attach_function()
+    #     else:
+    #         print("Empty")
 
     def upload_static_html_file(self):
         
@@ -514,24 +598,24 @@ class App(customtkinter.CTk):
                 self.html_full_content = file_content_str
                 self.seg_button_1.configure(state=customtkinter.DISABLED)
                 # self.dynamic_frame.grid_forget()
-                self.current_html_state = self.html_state[1]
+                # self.current_html_state = self.html_state[1]
                 #self.sub_attach_function()
             # except Exception as e:
             #     messagebox.showwarning("Error", "Html/Text file Error")
         else:
            messagebox.showwarning("No File", "Please select an Html/Text file.")
 
-    def upload_static_custom_file(self):
-        input_value = self.textbox_static.get("1.0", "end")  # Get text from textbox
+    # def upload_static_custom_file(self):
+    #     input_value = self.textbox_static.get("1.0", "end")  # Get text from textbox
         
-        if len(input_value) > 1 and input_value.strip() != "":
-            self.html_full_content = input_value
-            self.seg_button_1.configure(state=customtkinter.DISABLED)
-            self.dynamic_frame.grid_forget()
-            self.current_html_state = self.html_state[1]
-            self.sub_attach_function()
-        else:
-            print("Empty")
+    #     if len(input_value) > 1 and input_value.strip() != "":
+    #         self.html_full_content = input_value
+    #         self.seg_button_1.configure(state=customtkinter.DISABLED)
+    #         self.dynamic_frame.grid_forget()
+    #         self.current_html_state = self.html_state[1]
+    #         self.sub_attach_function()
+    #     else:
+    #         print("Empty")
         
     # def clear_text(self):
     #     self.entry_dynamic.delete(1)
@@ -560,7 +644,6 @@ class App(customtkinter.CTk):
                                     if row["MailStatus"] == "Completed":
                                         continue
                                 try:
-                                    print(index, row.iloc[0])
                                     for path in self.individual_attachments_header:
                                         if os.path.exists(rf"{row[path]}"):
                                             self.attachment_file_path_list.append(rf"{row[path]}")
@@ -575,6 +658,7 @@ class App(customtkinter.CTk):
                                     self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
                                     self.excel_file_df_to_mail['FromMail'] =  email_data.iloc[0] 
                                     self.excel_file_df_to_mail['MailStatus'] =  "Completed"
+                                    print(index, row.iloc[0])
                                     break  
                                 except Exception as e:
                                     error_mail_id.append(email_data.iloc[0])
