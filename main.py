@@ -292,7 +292,6 @@ class App(customtkinter.CTk):
     #     self.individual_attachments_header = data_dict 
     
     def sub_attach_function(self):
-        print("Attach entry")
         self.static_frame.grid_forget()
         self.dynamic_frame.grid_forget()
         # self.list_frame.grid_forget()
