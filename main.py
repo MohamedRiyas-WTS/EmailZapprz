@@ -14,7 +14,8 @@ from pathlib import Path
 import os
 from CTkMessagebox import CTkMessagebox
 import openpyxl
-
+import threading
+from PIL import Image
 
 
 class App(customtkinter.CTk):
@@ -34,6 +35,9 @@ class App(customtkinter.CTk):
         self.current_html_state = None
         self.individual_attachments_header = []
         self.email_subject = ""
+        self.break_flag = 0
+        self.total_email_data_count = 0
+        self.completed_count = 0
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
         # Disable window resizing
@@ -67,11 +71,6 @@ class App(customtkinter.CTk):
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        anchor="w", command=self.frame_2_button_event)
         self.frame_2_button.grid(row=4, column=0, sticky="ew")
-
-        self.start_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=50, height=40, border_spacing=10, text="Start Email",
-                                                      fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                       anchor="w", command=self.start_email)
-        self.start_button.grid(row=5, column=0, padx=20, pady=(150,0), sticky="s")
 
         self.appearance_mode_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Light", "Dark", "System"],
                                                                 command=self.change_appearance_mode_event)
@@ -121,12 +120,7 @@ class App(customtkinter.CTk):
         self.textbox_static.insert("2.0","Html Code goes here.../ Upload the html file")
         self.textbox_static.bind("<FocusIn>",self.clear_placeholder)
         self.textbox_static.bind("<KeyRelease>",lambda event: self.clear_entry_text_static())
-        # self.tabview = customtkinter.CTkTabview(self.second_frame, width=700,height=450,corner_radius=50)
-        # self.tabview.grid(row=0, column=1, padx=(65, 0), pady=(50,100), sticky="nsew")
-        # self.tabview.add("Static")
-        # self.tabview.add("Dynamic")
-        # self.tabview.tab("Static").grid_columnconfigure(2, weight=1)  # configure grid of individual tabs
-        # self.tabview.tab("Dynamic").grid_columnconfigure(2, weight=1)
+
         self.dynamic_upload_button=CTkButton(self.dynamic_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_html_file)
         self.dynamic_upload_button.grid(row=0, column=2, columnspan=3, padx=(10, 40), pady=(10, 10), sticky="ew")
         self.dynamic_sub_button=CTkButton(self.dynamic_frame,text="Submit",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.dynamic_sub_button_func)
@@ -143,46 +137,6 @@ class App(customtkinter.CTk):
         self.entry_static = customtkinter.CTkEntry(self.static_frame, placeholder_text="Upload....")
         self.entry_static.grid(row=0, column=0, columnspan=2, padx=(40, 1), pady=(10, 10), sticky="ew")
         self.entry_static.bind("<KeyRelease>",lambda event: self.clear_textbox_static())
-
-        """
-        self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
-        self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ns")
-        self.subject_attach_frame.grid_rowconfigure(1, weight=1)
-        self.subject_attach_frame.grid_columnconfigure(1, weight=1)  
-        self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(20, 10), sticky="ew")
-
-        self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
-        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(20, 10), sticky="ew")
-
-        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 230), sticky="ew")
-
-        self.attachment_files = CTkButton(self.subject_attach_frame,text="Upload",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=10,border_color="dark",text_color="#1c1c1c",corner_radius=10, command=self.static_attach_files_function)
-        self.attachment_files.grid(row=1, column=1, padx=(10, 350), pady=(1, 220))
-
-        self.individual_attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Individual Attachments",font=CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.individual_attach_label.grid(row=1, column=0, padx=(40, 10), pady=(0,0))
-
-        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame, label_text="Select Below columns",width=10,height=50)
-        self.dynamic_scroll_checkbox_frame.grid(row=1, column=1,padx=(1,330), pady=(100,0))
-        self.dynamic_scrollable_frame_checkbox = []
-
-        self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2, text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
-        self.attachment_sub_button.grid(row=2, column=1,padx=(300,0), pady=(30, 10))
-        self.attachment_back_button = CTkButton(self.subject_attach_frame,corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
-        self.attachment_back_button.grid(row=2, column=0,pady=(30, 10))
-
-        self.subject_attach_frame.grid_columnconfigure(0, weight=0)
-        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
-
-        self.subject_attach_frame.grid_forget()
-
-
-        self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
-        self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
-        self.list_frame.grid_forget()
-"""
 
         self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white", width=700,height=500)
         self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
@@ -222,7 +176,11 @@ class App(customtkinter.CTk):
         self.list_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white", width=700, height=500)
         self.list_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.list_frame.grid_forget()
-        
+
+
+        self.third_frame = customtkinter.CTkFrame(self, corner_radius=50, fg_color="black")
+        self.third_frame.grid_columnconfigure(0, weight=20)
+        self.third_frame.grid_forget()
 
     def attachment_back_function(self):
         self.subject_attach_frame.grid_forget()
@@ -352,6 +310,11 @@ class App(customtkinter.CTk):
                                                          fg_color="white", border_color="gray", border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.dynamic_back_button_function)
         self.dynamic_back_button.grid(row=1, column=2,columnspan=2, rowspan=2,padx=(10,350), pady=(350,10))
 
+        self.preview_logo = Image.open(r"logo\eye.png")
+        self.preview_logo_button = CTkButton(self.list_frame,corner_radius=30, text="",image=CTkImage(self.preview_logo),
+                                                         fg_color="transparent", border_color="green",border_width=2, text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),width=10, height=10, command=self.preview_button)
+        self.preview_logo_button.grid(row=1, column=2,padx=(630,10), pady=(350, 10))
+
         # create preview frame==>dummy frame created for future use
         self.preview_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="grey")
         self.preview_frame.grid_columnconfigure(0, weight=1)
@@ -364,6 +327,7 @@ class App(customtkinter.CTk):
 
     def clear_textbox_static(self):
         self.textbox_static.delete(1.0,"end")
+        
     def dynamic_back_button_function(self):
         self.list_frame.grid_forget()
         self.subject_attach_frame.configure(corner_radius=16)
@@ -407,13 +371,38 @@ class App(customtkinter.CTk):
         self.webview_window = webview.create_window("HTML Preview", html=html_code)
         webview.start()
 
+    def preview_button(self):
+        self.body_params = self.get_entry_data()
+        self.dynamic_preview_frame_function()
+
     def dynamic_submit_button(self):
         self.body_params = self.get_entry_data()
         self.preview_frame.configure(corner_radius=0)
         self.preview_frame.grid_columnconfigure(0, weight=1)
         self.preview_frame.grid_rowconfigure(1, weight=1)
-        self.dynamic_preview_frame_function()
+        # self.dynamic_preview_frame_function()
+
+        self.second_frame.grid_forget()
+
+        self.third_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="gray",width=700,height=500)
+        # self.third_frame.grid_columnconfigure(1, weight=1)
+        # # Set row and column weights
+        # self.third_frame.grid_rowconfigure(1, weight=1)
+        # self.third_frame.grid_rowconfigure(1, weight=1)
+        self.third_frame.grid(row=0, column=1, sticky="nsew")
+
+        progressbar_empty = customtkinter.CTkLabel(master=self.third_frame,text="Click Start Button",height=20, width=500)
+        progressbar_empty.grid(row=0, column=0, columnspan=2,padx=(150,0), pady=(200,0))
+        self.progressbar_text = customtkinter.CTkLabel(master=self.third_frame,text=" ",height=20, width=500)
+        self.progressbar_text.grid(row=0, column=0, columnspan=2,padx=(150,0), pady=(250,0))
+
+        self.start_button = customtkinter.CTkButton(self.third_frame, corner_radius=50, height=40, border_spacing=10, text="Start", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), command=self.start_email)
+        self.start_button.grid(row=1, column=1, padx=0, pady=(100,0))
         
+        self.email_back_button = customtkinter.CTkButton(self.third_frame, corner_radius=50, height=40, border_spacing=10, text="Back",
+                                                       text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), command = self.email_back_button_func)
+        self.email_back_button.grid(row=1, column=0, padx=(150,0), pady=(100,0))
+
         
     def on_entry_change(self, entry, combo_box):
         if entry.get():  # Check if the entry has text
@@ -421,6 +410,10 @@ class App(customtkinter.CTk):
         else:
             combo_box.configure(state="normal")
 
+    def email_back_button_func(self):
+        self.third_frame.grid_forget()
+        self.second_frame.grid(row=0, column=1, sticky="nsew")
+        self.attachment_sub_function()
             
     def select_frame_by_name(self, name):
 
@@ -488,13 +481,20 @@ class App(customtkinter.CTk):
         if file_path:
         # You can add the logic to process the Excel file here
             try:
-                
                 self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name="Sheet1")
                 self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name="Sheet2")
                 self.excel_file_path = file_path
                 excel_header = pd.read_excel(file_path,sheet_name="Sheet2")
                 self.excel_file_to_mail_header_list = excel_header.columns.tolist()
                 self.frame_2_button_event()
+                if "MailStatus" in self.excel_file_to_mail_header_list:
+                    for index, row in self.excel_file_df_to_mail.iterrows():
+                        if row.get("MailStatus"):
+                            if row["MailStatus"] != "Completed":
+                                self.total_email_data_count += 1
+                else:
+                    self.total_email_data_count = len(self.excel_file_df_to_mail)
+
             except PermissionError:
                 messagebox.showwarning("Error",f"The file '{file_path}' is already open. Please close it and try again.")
             except Exception as e:
@@ -541,12 +541,18 @@ class App(customtkinter.CTk):
         else:
             if dynamic_upload_value.strip() != "":
                 if os.path.exists(rf"{dynamic_upload_value.strip("\"")}"):
-                    self.sub_attach_function()
+                    if self.total_email_data_count != 0:
+                        self.sub_attach_function()
+                    else:
+                        messagebox.showwarning("Warning","Emails Sent Already")
                 else:
                     messagebox.showwarning("Error","File not found")
             else:
                 self.html_full_content = dynamic_text_value
-                self.sub_attach_function()
+                if self.total_email_data_count != 0:
+                        self.sub_attach_function()
+                else:
+                    messagebox.showwarning("Warning","Emails Sent Already")
 
 
     def static_sub_button_func(self):
@@ -630,19 +636,31 @@ class App(customtkinter.CTk):
                     body_params[key] = value
         return body_params
 
-    def mail_processer(self):
+    def mail_processor(self):
             error_mail_id = []
             excel_header = pd.read_excel(self.excel_file_path,sheet_name="Sheet2")
             excelfile_to_mail_header_list = excel_header.columns.tolist()
+            if "FromMail" not in excelfile_to_mail_header_list:
+                self.excel_file_df_to_mail['FromMail'] = ""
+                if "MailStatus" not in excelfile_to_mail_header_list:
+                    
+                    self.excel_file_df_to_mail['MailStatus'] = ""
+            else:
+                if "MailStatus" not in excelfile_to_mail_header_list:
+                    self.excel_file_df_to_mail['MailStatus'] = ""
+
             for index, row in self.excel_file_df_to_mail.iterrows():
+                    print(row)
                     # print(f"To mail {index+1},{row[0]}, {row[1]}")
-                    try:
-                        for i, email_data in self.excel_file_df_from_mail.iterrows():
-                            if email_data.iloc[0] not in error_mail_id:
-                                if "MailStatus" in excelfile_to_mail_header_list:
-                                    if row["MailStatus"] == "Completed":
-                                        continue
-                                try:
+                    print(self.break_flag)
+                    if self.break_flag == 0:
+                        # try:
+                            for i, email_data in self.excel_file_df_from_mail.iterrows():
+                                if email_data.iloc[0] not in error_mail_id:
+                                    if "MailStatus" in excelfile_to_mail_header_list:
+                                        if row["MailStatus"] == "Completed":
+                                            continue
+                                    # try:
                                     for path in self.individual_attachments_header:
                                         if os.path.exists(rf"{row[path]}"):
                                             self.attachment_file_path_list.append(rf"{row[path]}")
@@ -652,18 +670,27 @@ class App(customtkinter.CTk):
                                     gmail.send(subject = self.email_subject,
                                                 receivers = [recipient_email],
                                                 html =self.html_full_content,
-                                    body_params=self.evaluate_body_params(row),
-                                    attachments=self.attachment_file_path_list)
+                                                body_params=self.evaluate_body_params(row),
+                                                attachments=self.attachment_file_path_list)
                                     self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
-                                    self.excel_file_df_to_mail['FromMail'] =  email_data.iloc[0] 
-                                    self.excel_file_df_to_mail['MailStatus'] =  "Completed"
+                                    self.excel_file_df_to_mail.loc[index,'FromMail'] = email_data.iloc[0] 
+                                    self.excel_file_df_to_mail.loc[index,'MailStatus'] =  "Completed"
+                                    self.completed_count += 1
+                                    progressbar_value = (self.completed_count)/self.total_email_data_count
+                                    email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
+                                    email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
+                                    email_progressbar.set(progressbar_value)
+                                    self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
                                     print(index, row.iloc[0])
-                                    break  
-                                except Exception as e:
-                                    error_mail_id.append(email_data.iloc[0])
-                                    print(f"{email_data.iloc[0]} added to error list")
-                    except Exception as e:
-                        print(e)
+                                    break
+                        #             except Exception as e:
+                        #                 error_mail_id.append(email_data.iloc[0])
+                        #                 print(f"{email_data.iloc[0]} added to error list")
+                        # except Exception as e:
+                        #     print(e)
+                    else:
+                        break
+
 
             # Step 2: Create an ExcelWriter object
             with pd.ExcelWriter(self.excel_file_path, engine='openpyxl') as writer:
@@ -672,8 +699,18 @@ class App(customtkinter.CTk):
                 self.excel_file_df_to_mail.to_excel(writer, sheet_name='Sheet2', index=False)         
            
     def start_email(self):
-        # Need to set the try catch methods
-        self.mail_processer()
+        self.email_back_button.grid_forget()
+        self.start_button.grid_forget()
+        self.email_stop_button = customtkinter.CTkButton(self.third_frame, corner_radius=50, height=40, border_spacing=10, text="Stop", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), command=self.stop_back_button_func)
+        self.email_stop_button.grid(row=1, column=1, padx=(0,75), pady=(100,0))
+        threading.Thread(target=self.mail_processor).start()
+                        
+    def stop_back_button_func(self):
+        print("Entry")
+        self.break_flag = 1
+
+
+
 
 if __name__ == "__main__":
     app = App()
