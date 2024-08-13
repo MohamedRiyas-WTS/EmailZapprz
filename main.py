@@ -49,7 +49,7 @@ class App(customtkinter.CTk):
         self.email_bcc = None
         self.excel_sheet_name = ["From_Mail", "To_Mail"]
         self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus", "Completed"]
-        self.iconbitmap(r"logo\Zapperz_logo.ico")
+        self.iconbitmap(r"logo\zapperz_logo.ico")
         
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
@@ -92,7 +92,7 @@ class App(customtkinter.CTk):
         self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="#CADCFC")
         self.home_frame.grid_columnconfigure(0, weight=20)
 
-        self.logo_image = customtkinter.CTkImage(Image.open(self.current_directory(r"logo\eye.png")), size=(150, 150))
+        self.logo_image = customtkinter.CTkImage(Image.open(r"logo\zapperz_logo.png"), size=(150, 150))
         self.logo = customtkinter.CTkLabel(self.home_frame, text="", image=self.logo_image,
                                                              compound="right", font=customtkinter.CTkFont(size=15, weight="bold"))
         self.logo.grid(row=0, column=0, pady=10)
@@ -268,14 +268,14 @@ class App(customtkinter.CTk):
         except Exception as e:
             messagebox.showwarning("Error", "Error while creating template excel")
 
-    def current_directory(self, file_name):
-        # Get the current working directory
-        current_directory = os.getcwd()
+    # def current_directory(self, file_name):
+    #     # Get the current working directory
+    #     current_directory = os.getcwd()
 
-        # Join the directory and file name
-        file_path = os.path.join(current_directory, file_name)
+    #     # Join the directory and file name
+    #     file_path = os.path.join(current_directory, file_name)
 
-        return r"{}".format(file_path)
+    #     return r"{}".format(file_path)
 
     def attachment_preview_button_function(self):
         # Minimize the main window (self)
