@@ -15,8 +15,9 @@ import os
 from CTkMessagebox import CTkMessagebox
 import openpyxl
 import threading
-from PIL import Image
+from PIL import Image, ImageTk
 import copy
+
 
 
 class App(customtkinter.CTk):
@@ -44,7 +45,7 @@ class App(customtkinter.CTk):
         self.completed_count = 0
         
         # self.iconbitmap("WTS.ico")
-        self.resizable(False, False)  
+        # self.resizable(False, False)  
         # Disable window resizing
         window_width = 1000 
         # Window Width - Main frame
@@ -60,56 +61,58 @@ class App(customtkinter.CTk):
         
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0,fg_color="#0B0C10")
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(8, weight=1) 
 
-        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="EmailZapprz", compound="right", font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="Email Zapprz", compound="right", font=customtkinter.CTkFont(size=30, weight="bold",family="times"),text_color="#66FCF1")
         self.navigation_frame_label.grid(row=2, column=0, padx=20, pady=50)
         
-        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Excel Uploader", fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), anchor="w", command=self.home_button_event)
-        self.home_button.grid(row=3, column=0, sticky="ew")
+        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=5, height=40, border_spacing=0, width=200,font=customtkinter.CTkFont(size=15,family="times"),text="Excel Uploader", fg_color="#0B0C10", text_color=("#C5C6C7", "#C5C6C7"), anchor="w", command=self.home_button_event)
+        self.home_button.grid(row=3, column=0)
 
-        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Html Uploader", fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), anchor="w", command=self.frame_2_button_event)
-        self.frame_2_button.grid(row=4, column=0, sticky="ew")
+        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=5, height=40, width=200,font=customtkinter.CTkFont(size=15,family="times"), border_spacing=0, text="Html Uploader", fg_color="#1F2833", text_color=("#C5C6C7", "#C5C6C7"), anchor="w", command=self.frame_2_button_event)
+        self.frame_2_button.grid(row=4, column=0)
 
-        self.appearance_mode_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event)
-        self.appearance_mode_menu.grid(row=8, column=0, padx=20, pady=(10,50), sticky="s")
+        # self.appearance_mode_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event)
+        # self.appearance_mode_menu.grid(row=8, column=0, padx=20, pady=(10,50), sticky="s")
 
 
         # Home Frame 
-        self.home_frame = customtkinter.CTkFrame(self, corner_radius=50, fg_color="transparent")
+        self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="#B3B4BD")
         self.home_frame.grid_columnconfigure(0, weight=20)
 
-        self.home_frame_label = customtkinter.CTkLabel(self.home_frame, text="Email Credentials Files",font=CTkFont(family="times",size=34,weight="bold"),height=40)
+
+
+        self.home_frame_label = customtkinter.CTkLabel(self.home_frame, text="Email Credentials Files",font=CTkFont(family="times",size=40,weight="bold"),height=40,text_color="#66FCF1")
         self.home_frame_label.grid(row=0, column=0, padx=20, pady=80)
 
-        self.home_frame_qoute1_label = customtkinter.CTkLabel(self.home_frame, text="Select the following options",font=CTkFont(family="times",size=20,weight="bold",slant="italic"))
+        self.home_frame_qoute1_label = customtkinter.CTkLabel(self.home_frame, text="Select the following options",font=CTkFont(family="times",size=20,weight="bold",slant="italic"),text_color="#C5C6C7")
         self.home_frame_qoute1_label.grid(row=1, column=0, padx=20, pady=20)
 
-        self.path_frame_button = CTkButton(self.home_frame, text="Excel Path",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10,command=self.upload_file)
+        self.path_frame_button = CTkButton(self.home_frame, text="Excel Path",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#45A29E',hover=True,fg_color='#1F2833',height=40,border_color="#66FCF1",border_width=1,text_color="#C5C6C7",corner_radius=0,command=self.upload_file)
         self.path_frame_button.grid(row=2, column=0, padx=20, pady=10)
 
-        self.url_frame_button = CTkButton(self.home_frame, text="File URL",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10)
-        self.url_frame_button.grid(row=3, column=0, padx=20, pady=20)
+        # self.url_frame_button = CTkButton(self.home_frame, text="File URL",font=CTkFont(family="times",size=20,weight="bold"),hover_color='#808080',hover=True,fg_color='#3b8ed0',height=40,border_color="dark",text_color="#1c1c1c",corner_radius=10)
+        # self.url_frame_button.grid(row=3, column=0, padx=20, pady=20)
         
-        self.url_frame_button = customtkinter.CTkLabel(self.home_frame, text="Expecting\nSheet1 --> From Mail Credential \nSheet2 --> To Mail Credentials",font=CTkFont(family="times",size=15,weight="bold"),fg_color='#3b8ed0',height=40,text_color="#1c1c1c",corner_radius=10)
-        self.url_frame_button.grid(row=4, column=0, padx=20, pady=40)
+        # self.url_frame_button = customtkinter.CTkLabel(self.home_frame, text="Expecting\nSheet1 --> From Mail Credential \nSheet2 --> To Mail Credentials",font=CTkFont(family="times",size=15,weight="bold"),fg_color='#3b8ed0',height=40,text_color="#1c1c1c",corner_radius=10)
+        # self.url_frame_button.grid(row=4, column=0, padx=20, pady=40)
 
 
         # Second Frame
-        self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="grey")
+        self.second_frame = customtkinter.CTkScrollableFrame(self, corner_radius=0, fg_color="#1F2833")
         self.second_frame.grid_columnconfigure(0, weight=1)
         self.second_frame.grid_rowconfigure(1, weight=1)
 
-        self.seg_button_1 = customtkinter.CTkSegmentedButton(self.second_frame,font=CTkFont(family="times",size=18,weight="bold"),width=500,command=self.change_segment_event)
+        self.seg_button_1 = customtkinter.CTkSegmentedButton(self.second_frame,font=CTkFont(family="times",size=18,weight="bold"),width=500,command=self.change_segment_event,fg_color="#0B0C10",bg_color="#0B0C10",corner_radius=20,selected_color="#45A29E",text_color="#0B0C10",unselected_color="#1F2833")
         self.seg_button_1.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.seg_button_1.configure(values=["Dynamic", "Static"])
         self.seg_button_1.set("Dynamic")
 
 
         # Second Frame(Dynamic Frame)
-        self.dynamic_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white",width=500,height=500)
+        self.dynamic_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="#1F2833",width=500,height=500)
         self.dynamic_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
         self.dynamic_frame.grid_rowconfigure(1, weight=1)  # Allows the textbox row to expand
 
@@ -161,30 +164,45 @@ class App(customtkinter.CTk):
         # Second Frame(Subject and Attachments Frame)
         self.subject_attach_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="white", width=700,height=500)
         self.subject_attach_frame.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        self.subject_attach_frame.grid_rowconfigure(1, weight=1)
-        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
+        self.subject_attach_frame.grid_rowconfigure(1, weight=0)
+        self.subject_attach_frame.grid_columnconfigure(1, weight=0)
+        
 
-        self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=customtkinter.CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.subject_label.grid(row=0, column=0, padx=(40, 1), pady=(20, 10), sticky="ew")
+        self.subject_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Subject",font=customtkinter.CTkFont(family="times", size=14, weight="bold"), height=40)
+        self.subject_label.grid(row=0, column=0, padx=(20, 10), pady=(10, 10), sticky="w")
 
         self.subject_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="Enter the subject")
-        self.subject_entry.grid(row=0, column=1, padx=(10, 10), pady=(20, 10), sticky="ew")
+        self.subject_entry.grid(row=0, column=1, columnspan=2, padx=(10, 20), pady=(10, 10), sticky="ew")
+#####################################
+        self.cc_label = customtkinter.CTkLabel(self.subject_attach_frame, text="CC",font=customtkinter.CTkFont(family="times", size=14, weight="bold"), height=40)
+        self.cc_label.grid(row=1, column=0, padx=(20, 10), pady=(5, 10), sticky="w")
 
-        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=customtkinter.CTkFont(family="times", size=20, weight="bold"), height=40)
-        self.attach_label.grid(row=1, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+        self.cc_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="")
+        self.cc_entry.grid(row=1, column=1, columnspan=2, padx=(10, 20), pady=(5, 10), sticky="ew")
+        
+        self.bcc_label = customtkinter.CTkLabel(self.subject_attach_frame, text="BCC",font=customtkinter.CTkFont(family="times", size=14, weight="bold"), height=40)
+        self.bcc_label.grid(row=2, column=0, padx=(20, 10), pady=(5, 10), sticky="w")
 
-        self.attachment_files = customtkinter.CTkButton(self.subject_attach_frame, text="Upload",font=customtkinter.CTkFont(family="times", size=20, weight="bold"),hover_color='#808080', fg_color='#3b8ed0', height=10,text_color="#1c1c1c", corner_radius=10,command=self.static_attach_files_function)
-        self.attachment_files.grid(row=1, column=1, padx=(10, 10), pady=(10, 10), sticky="ew")
+        self.bcc_entry = customtkinter.CTkEntry(self.subject_attach_frame, placeholder_text="")
+        self.bcc_entry.grid(row=2, column=1, columnspan=2, padx=(10, 20), pady=(5, 10), sticky="ew")
+################################
 
-        self.individual_attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Individual Attachments",font=customtkinter.CTkFont(family="times", size=18, weight="bold"), height=40)
-        self.individual_attach_label.grid(row=2, column=0, padx=(40, 10), pady=(10, 10), sticky="ew")
+        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments",font=customtkinter.CTkFont(family="times", size=14, weight="bold"), height=40)
+        self.attach_label.grid(row=3, column=0, padx=(20, 10), pady=(5, 10), sticky="w")
 
-        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame,label_text="Select Below columns", width=500,height=200)
-        self.dynamic_scroll_checkbox_frame.grid(row=2, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
+        self.attachment_files = customtkinter.CTkButton(self.subject_attach_frame, text="Upload",font=customtkinter.CTkFont(family="times", size=14, weight="bold"),hover_color='#808080', fg_color='#3b8ed0', height=10,text_color="#1c1c1c", corner_radius=10,command=self.static_attach_files_function)
+        self.attachment_files.grid(row=3, column=1, padx=(10, 20), pady=(5, 10))
+
+        self.attachment_preview_button = customtkinter.CTkButton(self.subject_attach_frame, text="Preview",font=customtkinter.CTkFont(family="times", size=14, weight="bold"),hover_color='#808080', fg_color='#3b8ed0', height=10,text_color="#1c1c1c", corner_radius=10,command=self.attachment_preview_button_function)
+        self.attachment_preview_button.grid(row=3, column=2, padx=(10, 20), pady=(5, 10) )
+
+        self.individual_attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Individual Attachments",font=customtkinter.CTkFont(family="times", size=14, weight="bold"), height=40)
+        self.individual_attach_label.grid(row=4, column=0, padx=(20, 10), pady=(5, 10))
+
+       
+        self.dynamic_scroll_checkbox_frame = customtkinter.CTkScrollableFrame(self.subject_attach_frame,label_text="Select Below columns", height=100,width=500)
+        self.dynamic_scroll_checkbox_frame.grid(row=4, column=1,columnspan=2, padx=(10, 20), pady=(5, 10))
         self.dynamic_scrollable_frame_checkbox = []
-
-        self.subject_attach_frame.grid_columnconfigure(0, weight=1)
-        self.subject_attach_frame.grid_columnconfigure(1, weight=1)
         self.subject_attach_frame.grid_forget()
 
 
@@ -202,6 +220,11 @@ class App(customtkinter.CTk):
 
         self.frame_2_button.configure(state="disabled",fg_color= "transparent",text_color="black")
 
+    
+    def attachment_preview_button_function(self):
+        print("dbrgefdf")
+        pass
+
     # home_button
     def home_button_event(self):
         self.select_frame_by_name("home")
@@ -216,9 +239,9 @@ class App(customtkinter.CTk):
 
     
     #appearance_mode_menu
-    def change_appearance_mode_event(self, new_appearance_mode):
-        # Apperance Mode
-        customtkinter.set_appearance_mode(new_appearance_mode)
+    # def change_appearance_mode_event(self, new_appearance_mode):
+    #     # Apperance Mode
+    #     customtkinter.set_appearance_mode(new_appearance_mode)
 
 
     # Home Frame (path_frame_button)  
@@ -354,10 +377,10 @@ class App(customtkinter.CTk):
 
                     # Second Frame(Subject and Attachments Frame (Dynamic - Back and Submit Button))
                     self.attachment_back_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2,text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
-                    self.attachment_back_button.grid(row=3, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
+                    self.attachment_back_button.grid(row=5, column=0, padx=(20, 10), pady=(20, 10), sticky="w")
 
                     self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2,text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
-                    self.attachment_sub_button.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="e")
+                    self.attachment_sub_button.grid(row=5, column=1, columnspan=2, padx=(10, 20), pady=(20, 10), sticky="e")
                     
                     self.sub_attach_function()
                 else:
@@ -372,10 +395,10 @@ class App(customtkinter.CTk):
                 
                 # Second Frame(Subject and Attachments Frame (Dynamic - Back and Submit Button))
                 self.attachment_back_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Back",fg_color="white", border_color="gray", border_width=2,text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),command=self.attachment_back_function)
-                self.attachment_back_button.grid(row=3, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
+                self.attachment_back_button.grid(row=5, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
 
                 self.attachment_sub_button = customtkinter.CTkButton(self.subject_attach_frame, corner_radius=30, text="Submit",fg_color="white", border_color="green", border_width=2,text_color=("gray10", "gray90"), hover_color=("green", "green"),command=self.attachment_sub_function)
-                self.attachment_sub_button.grid(row=3, column=1, padx=(10, 10), pady=(10, 10), sticky="e")
+                self.attachment_sub_button.grid(row=5, column=1, columnspan=2, padx=(10, 10), pady=(10, 10), sticky="e")
                 self.sub_attach_function()
 
 
@@ -682,7 +705,10 @@ class App(customtkinter.CTk):
     def email_back_button_func(self):
         self.third_frame.grid_forget()
         self.second_frame.grid(row=0, column=1, sticky="nsew")
-        self.attachment_sub_function()
+        if self.current_html_state == self.html_state[0]:
+            self.attachment_sub_function()
+        else:
+            self.static_sub_button_func()
 
     
     # Body params function
@@ -733,6 +759,8 @@ class App(customtkinter.CTk):
                                         gmail.password = email_data.iloc[1]
                                         gmail.send(subject = self.email_subject,
                                                     receivers = [recipient_email],
+                                                    bcc = "",
+                                                    cc = "dhineshwisetechsource@gmail.com",
                                                     text = self.full_body_text_content,
                                                     html =self.html_full_content,
                                                     body_params=self.evaluate_body_params(row),
@@ -842,8 +870,8 @@ class App(customtkinter.CTk):
 
 
         # set button color for selected button
-        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.frame_2_button.configure(fg_color=("gray75", "gray25") if name == "frame_2" else "transparent")
+        self.home_button.configure(fg_color=("#1F2833", "#1F2833") if name == "home" else "#0B0C10")
+        self.frame_2_button.configure(fg_color=("#1F2833", "#1F2833") if name == "frame_2" else "#0B0C10")
 
         # show selected frame
         if name == "home":
