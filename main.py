@@ -17,8 +17,7 @@ import openpyxl
 import threading
 from PIL import Image, ImageTk
 import copy
-
-
+import requests
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -43,6 +42,8 @@ class App(customtkinter.CTk):
         self.break_flag = 0
         self.total_email_data_count = 0
         self.completed_count = 0
+        self.url = "http://www.google.com"
+        self.timeout = 5
         
         # self.iconbitmap("WTS.ico")
         # self.resizable(False, False)  
@@ -759,8 +760,6 @@ class App(customtkinter.CTk):
                                         gmail.password = email_data.iloc[1]
                                         gmail.send(subject = self.email_subject,
                                                     receivers = [recipient_email],
-                                                    bcc = "",
-                                                    cc = "dhineshwisetechsource@gmail.com",
                                                     text = self.full_body_text_content,
                                                     html =self.html_full_content,
                                                     body_params=self.evaluate_body_params(row),
@@ -787,7 +786,6 @@ class App(customtkinter.CTk):
                         self.third_frame.grid_forget()
                         self.subject_attach_frame.grid_forget()
                         self.list_frame.grid_forget()
-
                         self.select_frame_by_name(name="home")
                         self.home_button.configure(state="normal")
                         self.frame_2_button.configure(state="disabled")
@@ -838,7 +836,21 @@ class App(customtkinter.CTk):
         self.email_stop_button.grid(row=1, column=1, padx=(0,75), pady=(100,0))
         threading.Thread(target=self.mail_processor).start()
 
-
+    def check_internet_connection(self, url, timeout):
+        try:
+            response = requests.get(url, timeout=timeout)
+            # Check if the response status code is 200 (OK)
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except requests.ConnectionError:
+            # If there's a ConnectionError, the connection failed
+            return False
+        except requests.Timeout:
+            # If there's a Timeout, the request timed out
+            return False
+    
     def get_entry_data(self):
         data_dict = {}
         for label, entry_widget, combo_box in self.scrollable_frame_switches:
