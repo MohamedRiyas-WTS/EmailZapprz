@@ -37,9 +37,11 @@ class App(customtkinter.CTk):
         self.title(self.project_name)
         self.attachment_file_path_list = []
         self.static_attachment_file_count = 0
-        self.html_state = ["Dynamic","Static"]
+        # self.html_state = ["Dynamic","Static"]
+        self.html_state = ["Advanced","Normal"]
         self.current_html_state = None
         self.individual_attachments_header = []
+        self.replacer_keyword_list = []
         self.email_subject = ""
         self.break_flag = 0
         self.total_email_data_count = 0
@@ -48,7 +50,7 @@ class App(customtkinter.CTk):
         self.timeout = 5
         self.email_cc = None
         self.email_bcc = None
-        self.excel_sheet_name = ["From_Mail", "To_Mail"]
+        self.excel_sheet_name = ["From_Mail", "To_Mail", "Guide"]
         self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus"]
         self.iconbitmap(r"logo\zapperz_logo.ico")
         
@@ -120,8 +122,10 @@ class App(customtkinter.CTk):
 
         self.seg_button_1 = customtkinter.CTkSegmentedButton(self.second_frame,font=CTkFont(family="Times New Roman",size=18,weight="bold"),width=500,command=self.change_segment_event,fg_color="#CADCFC",bg_color="#CADCFC",corner_radius=20,selected_color="#00246B",text_color="white",unselected_color="gray")
         self.seg_button_1.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="ew")
-        self.seg_button_1.configure(values=["Dynamic", "Static"])
-        self.seg_button_1.set("Dynamic")
+        # self.seg_button_1.configure(values=["Dynamic", "Static"])
+        # self.seg_button_1.set("Dynamic")
+        self.seg_button_1.configure(values=["Advanced", "Normal"])
+        self.seg_button_1.set("Advanced")
 
         # Adjust the dynamic frame to full screen
         self.dynamic_frame = customtkinter.CTkFrame(self.second_frame, corner_radius=16, fg_color="#CADCFC")
@@ -211,7 +215,7 @@ class App(customtkinter.CTk):
         self.bcc_entry.grid(row=2, column=1, columnspan=2, padx=(5, 10), pady=(5, 5), sticky="ew")
 
         # Static Attachments label and buttons
-        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Static Attachments", font=customtkinter.CTkFont(family="Times New Roman", size=14, weight="bold"), height=40)
+        self.attach_label = customtkinter.CTkLabel(self.subject_attach_frame, text="Common Attachments", font=customtkinter.CTkFont(family="Times New Roman", size=14, weight="bold"), height=40)
         self.attach_label.grid(row=3, column=0, padx=(5, 5), pady=(5, 5), sticky="w")
 
         self.attachment_files = customtkinter.CTkButton(self.subject_attach_frame, text="Upload", font=customtkinter.CTkFont(family="Times New Roman", size=14, weight="bold"), hover_color='#808080', fg_color='#3b8ed0', text_color="#1c1c1c", corner_radius=10, command=self.static_attach_files_function)
@@ -246,13 +250,30 @@ class App(customtkinter.CTk):
     # Navigation Frame (To create a config file)
     def template_button_func(self):
         try:
-            # Create data for both sheets
+            # Create data for all sheets
             data1 = {"From_Mail_Id":[],"App_Password":[]}
             data2 = {"To_Mail_Id": []}
+            data3 = {"Configuration Instructions:":["","**Excel Instruction:**", 
+                                                    "First Sheet - (From_Mail):",
+                                                    "    Column 1 (From_Mail_Id): Fill in the sender's email address.",
+                                                    "    Column 2 (App_password) : Fill in the app password.",
+                                                    "    Note: We can add multiple sender email address along with their correct app password.",
+                                                    "",
+                                                    "Second Sheet - (To_Mail):",
+                                                    "    Column 1 (To_Mail_Id) : Fill in the recipient's email address (This field is mandatory).",
+                                                    "    Note: Then add multiple columns according to your needs.",
+                                                    "    Note: We can also give attachment path for individual receiver on separate column.",
+                                                    "",
+                                                    "",
+                                                    "**Mail Body Instruction:**",
+                                                    "    Note: The advanced email (text file/excel file) body contains dynamic content placeholders marked by {{word}} without spaces. Ensure all dynamic fields are correctly populated before sending. Eg.{{candidate_name}}"]}
 
-            # Create DataFrames for both sheets
+
+            # Create DataFrames for all sheets
             df1 = pd.DataFrame(data1)
             df2 = pd.DataFrame(data2)
+            df3 = pd.DataFrame(data3)
+
 
             date_time = dt.datetime.now().strftime("%m_%d_%Y_%H%M%S")
 
@@ -263,6 +284,7 @@ class App(customtkinter.CTk):
             with pd.ExcelWriter(downloads_path) as writer:
                 df1.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
                 df2.to_excel(writer, sheet_name=self.excel_sheet_name[1], index=False)
+                df3.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
             messagebox.showinfo("Success", f"Created successfully\n File path:\n{downloads_path}")
         except Exception as e:
             messagebox.showwarning("Error", "Error while creating template excel")
@@ -647,7 +669,6 @@ class App(customtkinter.CTk):
     def sub_attach_function(self):
         self.static_frame.grid_forget()
         self.dynamic_frame.grid_forget()
-        # self.seg_button_1.grid_forget()
         # self.list_frame.grid_forget()
         self.subject_attach_frame.configure()
         self.subject_attach_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
@@ -688,17 +709,20 @@ class App(customtkinter.CTk):
 
     # Second Frame(Email Mapping Frame( For Dynamic Contents))
     def list_frame_show_call(self):
+
         if self.html_full_content != None:
             body_content = self.html_full_content
         else:
             body_content = self.full_body_text_content
         params_variable = re.findall(r"\{\{(\w+)\}\}",body_content)
+        self.replacer_keyword_list = params_variable
+
         if params_variable and self.current_html_state == self.html_state[0]:
             if self.excel_file_to_mail_header_list:
                 self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
             else:
-                pass
                 # print("Empty header list")
+                pass
         else:
             self.dynamic_submit_button()
     
@@ -833,7 +857,8 @@ class App(customtkinter.CTk):
         self.third_frame.grid_forget()
         self.second_frame.grid(row=0, column=1, sticky="nsew")
         if self.current_html_state == self.html_state[0]:
-            self.attachment_sub_function()
+            if self.replacer_keyword_list:
+                self.attachment_sub_function()
         else:
             self.static_sub_button_func()
 
@@ -936,10 +961,12 @@ class App(customtkinter.CTk):
             self.scrollable_frame_switches = []
             self.attachment_file_path_list = []
             self.static_attachment_file_count = 0
-            self.html_state = ["Dynamic","Static"]
+            # self.html_state = ["Dynamic","Static"]
+            self.html_state = ["Advanced","Normal"]
             self.current_html_state = None
             self.individual_attachments_header=[]
             self.dynamic_scrollable_frame_checkbox = []
+            self.replacer_keyword_list = []
             self.email_subject = ""
             self.break_flag = 0
             self.total_email_data_count = 0
@@ -953,6 +980,8 @@ class App(customtkinter.CTk):
             self.entry_static.delete(0,"end")
             self.textbox_static.delete(1.0,"end")
             self.subject_entry.delete(0,"end")
+            self.cc_entry.delete(0,"end")
+            self.bcc_entry.delete(0,"end")
         
     # Final frame and Email Loading Bar(start_button)
     def start_email(self):
@@ -1018,7 +1047,7 @@ class App(customtkinter.CTk):
         # show selected frame
         if name == "home":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
-            self.template_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=5, height=30, width=150,font=customtkinter.CTkFont(size=17,family="Times New Roman"), border_spacing=0, text="Template", text_color="#00246B",hover=True,hover_color="white", command=self.template_button_func, fg_color="#CADCFC")
+            self.template_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=5, height=30, width=150,font=customtkinter.CTkFont(size=16,family="Times New Roman"), border_spacing=0, text="Download Template Here", text_color="#00246B",hover=True,hover_color="white", command=self.template_button_func, fg_color="#CADCFC")
             self.template_button.grid(row=7, column=0, pady=(300,50), sticky="s")
         else:
             self.home_frame.grid_forget()
