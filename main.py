@@ -39,6 +39,7 @@ class App(customtkinter.CTk):
         # Created global variables for storing the user given data
         self.excel_file_df_from_mail = None
         self.excel_file_df_to_mail = None
+        self.excel_file_df_guide = None
         self.html_full_content = None
         self.full_body_text_content = None
         self.body_params = None
@@ -399,21 +400,34 @@ class App(customtkinter.CTk):
             try:
                 self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name=self.excel_sheet_name[0])
                 self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name=self.excel_sheet_name[1])
-                self.excel_file_path = file_path
-                excel_header = pd.read_excel(file_path,sheet_name=self.excel_sheet_name[1])
-                self.excel_file_to_mail_header_list = excel_header.columns.tolist()
-                self.seg_button_1.configure(state="normal")
-                if self.excel_to_mail_header_changing_data[1] in self.excel_file_to_mail_header_list:
-                    for index, row in self.excel_file_df_to_mail.iterrows():
-                        if row.get(self.excel_to_mail_header_changing_data[1]):
-                            if row[self.excel_to_mail_header_changing_data[1]] != self.excel_to_mail_header_changing_data[2]:
-                                self.total_email_data_count += 1
+                print(len(self.excel_file_df_from_mail))
+                print(len(self.excel_file_df_to_mail))
+                if len(self.excel_file_df_from_mail) != 0:
+                    if len(self.excel_file_df_to_mail) != 0:
+                        try:
+                            self.excel_file_df_guide = pd.read_excel(file_path, sheet_name=self.excel_sheet_name[2])
+                        except Exception as e:
+                            self.excel_file_df_guide = None
+
+                        self.excel_file_path = file_path
+                        excel_header = pd.read_excel(file_path,sheet_name=self.excel_sheet_name[1])
+                        self.excel_file_to_mail_header_list = excel_header.columns.tolist()
+                        self.seg_button_1.configure(state="normal")
+                        if self.excel_to_mail_header_changing_data[1] in self.excel_file_to_mail_header_list:
+                            for index, row in self.excel_file_df_to_mail.iterrows():
+                                if row.get(self.excel_to_mail_header_changing_data[1]):
+                                    if row[self.excel_to_mail_header_changing_data[1]] != self.excel_to_mail_header_changing_data[2]:
+                                        self.total_email_data_count += 1
+                        else:
+                            self.total_email_data_count = len(self.excel_file_df_to_mail)
+                        if self.total_email_data_count != 0:
+                            self.frame_2_button_event()
+                        else:
+                            messagebox.showwarning("Warning","Emails Sent Already")
+                    else:
+                        messagebox.showwarning("Warning","Recipient Mail id is Empty")
                 else:
-                    self.total_email_data_count = len(self.excel_file_df_to_mail)
-                if self.total_email_data_count != 0:
-                    self.frame_2_button_event()
-                else:
-                    messagebox.showwarning("Warning","Emails Sent Already")
+                    messagebox.showwarning("Warning","Sender Mail id is Empty")
 
             except PermissionError:
                 messagebox.showwarning("Error",f"The file '{file_path}' is already open. Please close it and try again.")
@@ -910,7 +924,7 @@ class App(customtkinter.CTk):
             for index, row in self.excel_file_df_to_mail.iterrows():
                     if self.check_internet_connection(self.url, self.timeout):
                         if self.break_flag == 0:
-                            # try:
+                            try:
                                 for i, email_data in self.excel_file_df_from_mail.iterrows():
                                     if email_data.iloc[0] not in error_mail_id:
                                         if self.excel_to_mail_header_changing_data[1] in excelfile_to_mail_header_list:
@@ -943,18 +957,14 @@ class App(customtkinter.CTk):
                                             self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
                                             break
                                         except AttributeError:
-                                            print(email_data.iloc[0])
                                             error_mail_id.append(email_data.iloc[0])
-                                            print("Password wrong")
                                         except smtplib.SMTPAuthenticationError:
                                             error_mail_id.append(email_data.iloc[0]) 
-                                            print("username and password not accepted")
                                         except Exception as e:
                                             error_mail_id.append(email_data.iloc[0])
                                             logging.error(e)
-                            # except Exception as e:
-                            #     print("Error")
-                            #     logging.error(e)
+                            except Exception as e:
+                                logging.error(e)
                         else:
                             messagebox.showwarning("Stop", "Process Stopped")
                             self.back_to_normal()
@@ -975,10 +985,15 @@ class App(customtkinter.CTk):
                 # Write each DataFrame to a different sheet
                 self.excel_file_df_from_mail.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
                 self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[1], index=False)
-                self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
+                try:
+                    if self.excel_file_df_guide == None:
+                        pass
+                except ValueError:
+                    self.excel_file_df_guide.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
 
             self.excel_file_df_from_mail = None
             self.excel_file_df_to_mail = None
+            self.excel_file_df_guide = None
             self.html_full_content = None
             self.full_body_text_content = None
             self.body_params = None
