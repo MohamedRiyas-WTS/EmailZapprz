@@ -19,8 +19,19 @@ from PIL import Image, ImageTk
 import copy
 import requests
 import datetime as dt
+import logging
+import smtplib
+
+try:
+    logging.basicConfig(filename='tracker.log', level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+except Exception as e:
+    pass
 
 class App(customtkinter.CTk):
+
+    customtkinter.set_appearance_mode("light")
+
     def __init__(self):
         super().__init__()
 
@@ -51,7 +62,7 @@ class App(customtkinter.CTk):
         self.email_cc = None
         self.email_bcc = None
         self.excel_sheet_name = ["From_Mail", "To_Mail", "Guide"]
-        self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus"]
+        self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus", "Completed"]
         self.iconbitmap(r"logo\zapperz_logo.ico")
         
         # self.iconbitmap("WTS.ico")
@@ -261,7 +272,7 @@ class App(customtkinter.CTk):
                                                     "",
                                                     "Second Sheet - (To_Mail):",
                                                     "    Column 1 (To_Mail_Id) : Fill in the recipient's email address (This field is mandatory).",
-                                                    "    Note: Then add multiple columns according to your needs.",
+                                                    "    Note: Then add multiple columns with column headings accordingly based on your needs.",
                                                     "    Note: We can also give attachment path for individual receiver on separate column.",
                                                     "",
                                                     "",
@@ -288,6 +299,7 @@ class App(customtkinter.CTk):
             messagebox.showinfo("Success", f"Created successfully\n File path:\n{downloads_path}")
         except Exception as e:
             messagebox.showwarning("Error", "Error while creating template excel")
+            logging.error(e)
 
 
     # Second Frame(Subject and Attachments Frame(attachment_preview_button))
@@ -394,7 +406,7 @@ class App(customtkinter.CTk):
                 if self.excel_to_mail_header_changing_data[1] in self.excel_file_to_mail_header_list:
                     for index, row in self.excel_file_df_to_mail.iterrows():
                         if row.get(self.excel_to_mail_header_changing_data[1]):
-                            if row[self.excel_to_mail_header_changing_data[1]] != "Completed":
+                            if row[self.excel_to_mail_header_changing_data[1]] != self.excel_to_mail_header_changing_data[2]:
                                 self.total_email_data_count += 1
                 else:
                     self.total_email_data_count = len(self.excel_file_df_to_mail)
@@ -407,6 +419,7 @@ class App(customtkinter.CTk):
                 messagebox.showwarning("Error",f"The file '{file_path}' is already open. Please close it and try again.")
             except Exception as e:
                 messagebox.showwarning("Error","Excel file error")
+                logging.error(e)
         else:
            messagebox.showwarning("No File", "Please select an Excel file.")
 
@@ -498,7 +511,7 @@ class App(customtkinter.CTk):
             self.attachment_sub_button.destroy()
             self.static_preview_logo_button.destroy()
         except Exception as e:
-            pass
+            logging.error(e)
 
         if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
@@ -576,7 +589,7 @@ class App(customtkinter.CTk):
             self.attachment_back_button.destroy()
             self.attachment_sub_button.destroy()
         except Exception as e:
-            pass
+            logging.error(e)
         if (static_text_value.strip() == "" or static_text_value.strip() == "Html Code goes here.../ Upload the html file") and static_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
             messagebox.showwarning("Error","Please enter a value/select the file")
@@ -882,7 +895,6 @@ class App(customtkinter.CTk):
             email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
             self.progressbar_text.configure(text=f"0/{self.total_email_data_count}")
             email_progressbar.set(0)
-
             error_mail_id = []
             excel_header = pd.read_excel(self.excel_file_path,sheet_name=self.excel_sheet_name[1])
             excelfile_to_mail_header_list = excel_header.columns.tolist()
@@ -898,11 +910,11 @@ class App(customtkinter.CTk):
             for index, row in self.excel_file_df_to_mail.iterrows():
                     if self.check_internet_connection(self.url, self.timeout):
                         if self.break_flag == 0:
-                            try:
+                            # try:
                                 for i, email_data in self.excel_file_df_from_mail.iterrows():
                                     if email_data.iloc[0] not in error_mail_id:
                                         if self.excel_to_mail_header_changing_data[1] in excelfile_to_mail_header_list:
-                                            if row[self.excel_to_mail_header_changing_data[1]] == "Completed":
+                                            if row[self.excel_to_mail_header_changing_data[1]] == self.excel_to_mail_header_changing_data[2]:
                                                 continue
                                         try:
                                             for path in self.individual_attachments_header:
@@ -920,8 +932,9 @@ class App(customtkinter.CTk):
                                                         body_params=self.evaluate_body_params(row),
                                                         attachments=self.attachment_file_path_list)
                                             self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
-                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[0]] = email_data.iloc[0] 
-                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[1]] = "Completed"
+                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[0]] = email_data.iloc[0]
+                                            self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]].astype(object)
+                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[1]] = self.excel_to_mail_header_changing_data[2]
                                             self.completed_count += 1
                                             progressbar_value = (self.completed_count)/self.total_email_data_count
                                             email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
@@ -929,10 +942,19 @@ class App(customtkinter.CTk):
                                             email_progressbar.set(progressbar_value)
                                             self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
                                             break
+                                        except AttributeError:
+                                            print(email_data.iloc[0])
+                                            error_mail_id.append(email_data.iloc[0])
+                                            print("Password wrong")
+                                        except smtplib.SMTPAuthenticationError:
+                                            error_mail_id.append(email_data.iloc[0]) 
+                                            print("username and password not accepted")
                                         except Exception as e:
                                             error_mail_id.append(email_data.iloc[0])
-                            except Exception as e:
-                                pass
+                                            logging.error(e)
+                            # except Exception as e:
+                            #     print("Error")
+                            #     logging.error(e)
                         else:
                             messagebox.showwarning("Stop", "Process Stopped")
                             self.back_to_normal()
@@ -942,7 +964,10 @@ class App(customtkinter.CTk):
                         self.back_to_normal()
                         break
             else:
-                messagebox.showinfo("Succcess", "Email Sent Successfully")
+                if len(error_mail_id) != len(self.excel_file_df_from_mail):
+                    messagebox.showinfo("Succcess", "Email Sent Successfully")
+                else:
+                    messagebox.showerror("Error","Mail Error (Try Again)")
                 self.back_to_normal()
 
             # Step 2: Create an ExcelWriter object
@@ -950,6 +975,7 @@ class App(customtkinter.CTk):
                 # Write each DataFrame to a different sheet
                 self.excel_file_df_from_mail.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
                 self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[1], index=False)
+                self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
 
             self.excel_file_df_from_mail = None
             self.excel_file_df_to_mail = None
@@ -1073,6 +1099,8 @@ class App(customtkinter.CTk):
         self.select_frame_by_name(name="home")
         self.home_button.configure(state="normal")
         self.frame_2_button.configure(state="disabled")
+
+    
 
 if __name__ == "__main__":
     app = App()
