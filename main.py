@@ -486,8 +486,6 @@ class App(customtkinter.CTk):
            messagebox.showwarning("No File", "Please select an Html/Text file.")
            
            
-
-
     # Second Frame(Dynamic Frame(textbox_dynamic.bind))
     def clear_placeholder(self, event): # function for clearing the place holder
         if self.textbox_dynamic.get("1.0", "end-1c") == "Html Code goes here.../ Upload the html file":
@@ -1114,8 +1112,6 @@ class App(customtkinter.CTk):
         self.select_frame_by_name(name="home")
         self.home_button.configure(state="normal")
         self.frame_2_button.configure(state="disabled")
-
-    
 
 if __name__ == "__main__":
     app = App()
