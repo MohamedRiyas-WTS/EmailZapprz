@@ -400,8 +400,6 @@ class App(customtkinter.CTk):
             try:
                 self.excel_file_df_from_mail = pd.read_excel(file_path, sheet_name=self.excel_sheet_name[0])
                 self.excel_file_df_to_mail = pd.read_excel(file_path,sheet_name=self.excel_sheet_name[1])
-                print(len(self.excel_file_df_from_mail))
-                print(len(self.excel_file_df_to_mail))
                 if len(self.excel_file_df_from_mail) != 0:
                     if len(self.excel_file_df_to_mail) != 0:
                         try:
