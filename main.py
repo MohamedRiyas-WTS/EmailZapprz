@@ -942,7 +942,8 @@ class App(customtkinter.CTk):
                                                         body_params=self.evaluate_body_params(row),
                                                         attachments=self.attachment_file_path_list)
                                             self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
-                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[0]] = email_data.iloc[0]
+                                            self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
+                                            self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data.iloc[0])
                                             self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]].astype(object)
                                             self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[1]] = self.excel_to_mail_header_changing_data[2]
                                             self.completed_count += 1
