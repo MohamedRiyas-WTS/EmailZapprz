@@ -28,6 +28,7 @@ try:
 except Exception as e:
     pass
 
+
 class App(customtkinter.CTk):
 
     customtkinter.set_appearance_mode("light")
@@ -521,7 +522,7 @@ class App(customtkinter.CTk):
             self.attachment_sub_button.destroy()
             self.static_preview_logo_button.destroy()
         except Exception as e:
-            logging.error(e)
+            pass
 
         if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
@@ -938,9 +939,9 @@ class App(customtkinter.CTk):
                                                         cc = self.email_cc,
                                                         receivers = [recipient_email],
                                                         text = self.full_body_text_content,
-                                                        html =self.html_full_content,
-                                                        body_params=self.evaluate_body_params(row),
-                                                        attachments=self.attachment_file_path_list)
+                                                        html = self.html_full_content,
+                                                        body_params = self.evaluate_body_params(row),
+                                                        attachments = self.attachment_file_path_list)
                                             self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
                                             self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
                                             self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data.iloc[0])
@@ -971,6 +972,7 @@ class App(customtkinter.CTk):
                         self.back_to_normal()
                         break
             else:
+                logging.error(f"Error mail id :{len(error_mail_id)}, Total Email: {len(self.excel_file_df_from_mail)}")
                 if len(error_mail_id) != len(self.excel_file_df_from_mail):
                     messagebox.showinfo("Succcess", "Email Sent Successfully")
                 else:
