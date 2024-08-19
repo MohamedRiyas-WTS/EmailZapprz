@@ -749,7 +749,6 @@ class App(customtkinter.CTk):
         else:
             self.dynamic_submit_button()
             
-    
 
     # Second Frame(Email Mapping Frame( For Dynamic Contents))
     def list_frame_show(self,params_variable, params_name):
