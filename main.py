@@ -523,7 +523,6 @@ class App(customtkinter.CTk):
             self.static_preview_logo_button.destroy()
         except Exception as e:
             pass
-
         if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
             messagebox.showwarning("Error","Please enter a value/select the file")
@@ -601,6 +600,7 @@ class App(customtkinter.CTk):
             self.attachment_sub_button.destroy()
         except Exception as e:
             logging.error(e)
+
         if (static_text_value.strip() == "" or static_text_value.strip() == "Html Code goes here.../ Upload the html file") and static_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
             messagebox.showwarning("Error","Please enter a value/select the file")
@@ -733,7 +733,6 @@ class App(customtkinter.CTk):
 
     # Second Frame(Email Mapping Frame( For Dynamic Contents))
     def list_frame_show_call(self):
-
         if self.html_full_content != None:
             body_content = self.html_full_content
         else:
@@ -745,10 +744,11 @@ class App(customtkinter.CTk):
             if self.excel_file_to_mail_header_list:
                 self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
             else:
-                # print("Empty header list")
+                # print("Empty header list") # Need to change the code in this place
                 pass
         else:
             self.dynamic_submit_button()
+            
     
 
     # Second Frame(Email Mapping Frame( For Dynamic Contents))
@@ -907,7 +907,15 @@ class App(customtkinter.CTk):
             self.progressbar_text.configure(text=f"0/{self.total_email_data_count}")
             email_progressbar.set(0)
             error_mail_id = []
-            excel_header = pd.read_excel(self.excel_file_path,sheet_name=self.excel_sheet_name[1])
+            file_open_flag = 0
+            file_saving_flag = 0
+            while file_open_flag == 0:
+                try:
+                    excel_header = pd.read_excel(self.excel_file_path,sheet_name=self.excel_sheet_name[1])
+                    file_open_flag = 1
+                except PermissionError:
+                        messagebox.showwarning("Permission Error", f"File path: {self.excel_file_path} is already open.\nClose the file and try again")
+
             excelfile_to_mail_header_list = excel_header.columns.tolist()
             if self.excel_to_mail_header_changing_data[0] not in excelfile_to_mail_header_list:
                 self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = ""
@@ -921,6 +929,7 @@ class App(customtkinter.CTk):
             for index, row in self.excel_file_df_to_mail.iterrows():
                     if self.check_internet_connection(self.url, self.timeout):
                         if self.break_flag == 0:
+                            print(index+1,row.iloc[0])
                             try:
                                 for i, email_data in self.excel_file_df_from_mail.iterrows():
                                     if email_data.iloc[0] not in error_mail_id:
@@ -942,6 +951,7 @@ class App(customtkinter.CTk):
                                                         html = self.html_full_content,
                                                         body_params = self.evaluate_body_params(row),
                                                         attachments = self.attachment_file_path_list)
+                                            print("send", recipient_email)
                                             self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
                                             self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
                                             self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data.iloc[0])
@@ -955,13 +965,17 @@ class App(customtkinter.CTk):
                                             self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
                                             break
                                         except AttributeError:
+                                            print("Attribute Error")
                                             error_mail_id.append(email_data.iloc[0])
                                         except smtplib.SMTPAuthenticationError:
+                                            print("Authentication Error")
                                             error_mail_id.append(email_data.iloc[0]) 
                                         except Exception as e:
+                                            print("other Error 1")
                                             error_mail_id.append(email_data.iloc[0])
                                             logging.error(e)
                             except Exception as e:
+                                print("other Error 2")
                                 logging.error(e)
                         else:
                             messagebox.showwarning("Stop", "Process Stopped")
@@ -978,17 +992,24 @@ class App(customtkinter.CTk):
                 else:
                     messagebox.showerror("Error","Mail Error (Try Again)")
                 self.back_to_normal()
-
-            # Step 2: Create an ExcelWriter object
-            with pd.ExcelWriter(self.excel_file_path, engine='openpyxl') as writer:
-                # Write each DataFrame to a different sheet
-                self.excel_file_df_from_mail.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
-                self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[1], index=False)
+            
+            while file_saving_flag == 0:
                 try:
-                    if self.excel_file_df_guide == None:
-                        pass
-                except ValueError:
-                    self.excel_file_df_guide.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
+                    # Step 2: Create an ExcelWriter object
+                    with pd.ExcelWriter(self.excel_file_path, engine='openpyxl') as writer:
+                        # Write each DataFrame to a different sheet
+                        self.excel_file_df_from_mail.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
+                        self.excel_file_df_to_mail.to_excel(writer, sheet_name=self.excel_sheet_name[1], index=False)
+                        try:
+                            if self.excel_file_df_guide == None:
+                                pass
+                        except ValueError:
+                            self.excel_file_df_guide.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
+                    file_saving_flag = 1
+                except PermissionError:
+                    messagebox.showwarning("Permission Error", f"File path: {self.excel_file_path} is already open.\nClose the file and try again")
+        
+            
 
             self.excel_file_df_from_mail = None
             self.excel_file_df_to_mail = None
