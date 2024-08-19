@@ -744,7 +744,7 @@ class App(customtkinter.CTk):
             if self.excel_file_to_mail_header_list:
                 self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
             else:
-                # print("Empty header list") # Need to change the code in this place
+                # print("Empty header list")
                 pass
         else:
             self.dynamic_submit_button()
@@ -929,7 +929,6 @@ class App(customtkinter.CTk):
             for index, row in self.excel_file_df_to_mail.iterrows():
                     if self.check_internet_connection(self.url, self.timeout):
                         if self.break_flag == 0:
-                            print(index+1,row.iloc[0])
                             try:
                                 for i, email_data in self.excel_file_df_from_mail.iterrows():
                                     if email_data.iloc[0] not in error_mail_id:
@@ -951,7 +950,6 @@ class App(customtkinter.CTk):
                                                         html = self.html_full_content,
                                                         body_params = self.evaluate_body_params(row),
                                                         attachments = self.attachment_file_path_list)
-                                            print("send", recipient_email)
                                             self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
                                             self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
                                             self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data.iloc[0])
@@ -965,17 +963,13 @@ class App(customtkinter.CTk):
                                             self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
                                             break
                                         except AttributeError:
-                                            print("Attribute Error")
                                             error_mail_id.append(email_data.iloc[0])
                                         except smtplib.SMTPAuthenticationError:
-                                            print("Authentication Error")
                                             error_mail_id.append(email_data.iloc[0]) 
                                         except Exception as e:
-                                            print("other Error 1")
                                             error_mail_id.append(email_data.iloc[0])
                                             logging.error(e)
                             except Exception as e:
-                                print("other Error 2")
                                 logging.error(e)
                         else:
                             messagebox.showwarning("Stop", "Process Stopped")
