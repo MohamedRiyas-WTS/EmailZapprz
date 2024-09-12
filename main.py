@@ -21,12 +21,17 @@ import requests
 import datetime as dt
 import logging
 import smtplib
+import socket
+import time
+import queue
+
 
 try:
     logging.basicConfig(filename='tracker.log', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s')
 except Exception as e:
-    pass
+    logging.error(e)
+    # pass
 
 
 class App(customtkinter.CTk):
@@ -37,6 +42,13 @@ class App(customtkinter.CTk):
         super().__init__()
 
         self.project_name = "Email Zapperz"
+
+        # Initialize a flag to control the thread
+        self.email_processing = False
+
+        # Bind the window close event to a custom handler
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         # Created global variables for storing the user given data
         self.excel_file_df_from_mail = None
         self.excel_file_df_to_mail = None
@@ -50,22 +62,25 @@ class App(customtkinter.CTk):
         self.title(self.project_name)
         self.attachment_file_path_list = []
         self.static_attachment_file_count = 0
+        self.email_thread = None
         # self.html_state = ["Dynamic","Static"]
         self.html_state = ["Advanced","Normal"]
         self.current_html_state = None
         self.individual_attachments_header = []
         self.replacer_keyword_list = []
+        self.error_mail_id = []
         self.email_subject = ""
-        self.break_flag = 0
         self.total_email_data_count = 0
         self.completed_count = 0
-        self.url = "http://www.google.com"
-        self.timeout = 5
+        self.retry_timeout = 10
         self.email_cc = None
         self.email_bcc = None
         self.excel_sheet_name = ["From_Mail", "To_Mail", "Guide"]
-        self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus", "Completed"]
+        self.excel_to_mail_header_changing_data = ["FromMail", "MailStatus", "Completed", "To_Mail_Id", "SentStatus", "AddressNotFound", "Sent"]
+        self.ip_add = "8.8.8.8"
+        self.port_no = 53
         self.iconbitmap(r"logo\zapperz_logo.ico")
+
         
         # self.iconbitmap("WTS.ico")
         self.resizable(False, False)  
@@ -419,15 +434,17 @@ class App(customtkinter.CTk):
                                         self.total_email_data_count += 1
                         else:
                             self.total_email_data_count = len(self.excel_file_df_to_mail)
-                        if self.total_email_data_count != 0:
-                            self.frame_2_button_event()
+                        if self.excel_to_mail_header_changing_data[3] in self.excel_file_to_mail_header_list:
+                            if self.total_email_data_count != 0:
+                                self.frame_2_button_event()
+                            else:
+                                messagebox.showwarning("Warning","Emails Sent Already")
                         else:
-                            messagebox.showwarning("Warning","Emails Sent Already")
+                            messagebox.showwarning("Warning",f"There is no `{self.excel_to_mail_header_changing_data[3]}` column in `{self.excel_sheet_name[1]}` sheet")
                     else:
                         messagebox.showwarning("Warning","Recipient Mail id is Empty")
                 else:
                     messagebox.showwarning("Warning","Sender Mail id is Empty")
-
             except PermissionError:
                 messagebox.showwarning("Error",f"The file '{file_path}' is already open. Please close it and try again.")
             except Exception as e:
@@ -522,7 +539,8 @@ class App(customtkinter.CTk):
             self.attachment_sub_button.destroy()
             self.static_preview_logo_button.destroy()
         except Exception as e:
-            pass
+            logging.error(e)
+            # pass
         if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
             messagebox.showwarning("Error","Please enter a value/select the file")
@@ -744,8 +762,9 @@ class App(customtkinter.CTk):
             if self.excel_file_to_mail_header_list:
                 self.list_frame_show(params_variable, self.excel_file_to_mail_header_list)
             else:
+                logging.error("Empty header list")
                 # print("Empty header list")
-                pass
+                # pass
         else:
             self.dynamic_submit_button()
             
@@ -897,98 +916,120 @@ class App(customtkinter.CTk):
                 else:
                     body_params[key] = value
         return body_params
-    
 
-    # Main Mail sender function
-    def mail_processor(self):
-            email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
-            email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
-            self.progressbar_text.configure(text=f"0/{self.total_email_data_count}")
-            email_progressbar.set(0)
-            error_mail_id = []
-            file_open_flag = 0
-            file_saving_flag = 0
+
+    # Internet Connection Check and email sending function
+    def send_email_with_connection_check(self, sender_email, sender_email_password, recipient_email, row):
+        try:
+            socket.create_connection((self.ip_add, self.port_no), timeout=5)
+            gmail.username = str(sender_email)
+            gmail.password = str(sender_email_password)
+            gmail.send(
+                subject=self.email_subject,
+                bcc=self.email_bcc,
+                cc=self.email_cc,
+                receivers=[recipient_email],
+                text=self.full_body_text_content,
+                html=self.html_full_content,
+                body_params=self.evaluate_body_params(row),
+                attachments=self.attachment_file_path_list
+            )            
+        except socket.gaierror:
+            # print(f"Failed to send email due to DNS resolution error")
+            raise socket.gaierror ("DNS resolution Error")   
+        except smtplib.SMTPAuthenticationError:
+            # print(f'Failed to send email due to bad credentials')
+            raise smtplib.SMTPAuthenticationError("Username or App password wrong")
+        except smtplib.SMTPException as e:
+            logging.error(e)
+            if 'Quota exceeded' in str(e):
+                # print('Email limit exceeded. You have hit the daily sending limit.')
+                raise smtplib.SMTPException("Limit Exceed")
+            else:
+                # print(f'SMTP error occurred: {e}')
+                raise smtplib.SMTPException(e)
+        except Exception as e:
+            # print(f"Failed to send email: {e}")
+            logging.error(e)
+            raise Exception (e)
+
+
+    # Internet Connection Check function    
+    def send_email_thread(self, username, password, recipient_email, row, result_queue):
+        try:
+            self.send_email_with_connection_check(username, password, recipient_email, row)
+            # return True
+            result_queue.put(True)
+        except Exception as e:
+            logging.error(e)
+            # print(f"Email sending failed: {e}")
+            if isinstance(e, socket.gaierror):
+                self.save_file()
+                self.email_processing = False
+                self.back_to_normal()
+                self.values_reset_func()
+                messagebox.showwarning("Error", "DNS Server Error\nPlease try after sometime!!")
+                result_queue.put((False, 'gaierror'))
+                # return False  # Return False for socket.gaierror
+            elif isinstance(e, TypeError):
+                result_queue.put((False, 'TypeError'))  # Return False for TypeError
+            else:
+                result_queue.put((False, 'OtherError'))  # Return False for any other exception
+
+   
+    # Retry function
+    def send_email_with_retry(self, username, password, recipient_email, row, max_retries=3, retry_delay=5):
+
+        retry_count = 0
+        result_queue = queue.Queue()
+
+        while retry_count < max_retries:
+            try:
+                # Start a new thread for email sending
+                email_thread = threading.Thread(target=self.send_email_thread, args=(username, password, recipient_email, row, result_queue))
+                email_thread.start()
+
+                # Allow a max of self.retry_timeout seconds for the thread to complete
+                email_thread.join(timeout=self.retry_timeout)
+
+                if email_thread.is_alive():
+                    # print("Email sending timed out. Killing the thread.")
+                    return 0  # Fail after timeout
+                else:
+                    result = result_queue.get() 
+
+                    if result == True:
+                        # print(f"Email successfully sent to {recipient_email}.")
+                        return 1  # Email sent successfully
+                    elif result == (False, 'TypeError'):
+                        return 2  # TypeError
+                    else:
+                        return 3  # Other errors
+            except ConnectionError as e:
+                logging.error(e)
+                # print(f"Retrying due to connection error: {e}")
+                # pass
+            except Exception as e:
+                logging.error(e)
+                # print(f"Retrying due to an unexpected error: {e}")
+                # pass
+
+            # Increment retry count and wait before retrying
+            retry_count += 1
+            # print(f"Retrying {retry_count}/{max_retries} in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+
+        # print("Failed to send email after all retries.")
+        return 0  # Failed after all retries
+
+    # File saving function
+    def save_file(self):
+
+        file_open_flag = 0
+        if self.excel_file_path != None :
             while file_open_flag == 0:
                 try:
-                    excel_header = pd.read_excel(self.excel_file_path,sheet_name=self.excel_sheet_name[1])
-                    file_open_flag = 1
-                except PermissionError:
-                        messagebox.showwarning("Permission Error", f"File path: {self.excel_file_path} is already open.\nClose the file and try again")
-
-            excelfile_to_mail_header_list = excel_header.columns.tolist()
-            if self.excel_to_mail_header_changing_data[0] not in excelfile_to_mail_header_list:
-                self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = ""
-                if self.excel_to_mail_header_changing_data[1] not in excelfile_to_mail_header_list:
-                    
-                    self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = ""
-            else:
-                if self.excel_to_mail_header_changing_data[1] not in excelfile_to_mail_header_list:
-                    self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = ""
-
-            for index, row in self.excel_file_df_to_mail.iterrows():
-                    if self.check_internet_connection(self.url, self.timeout):
-                        if self.break_flag == 0:
-                            try:
-                                for i, email_data in self.excel_file_df_from_mail.iterrows():
-                                    if email_data.iloc[0] not in error_mail_id:
-                                        if self.excel_to_mail_header_changing_data[1] in excelfile_to_mail_header_list:
-                                            if row[self.excel_to_mail_header_changing_data[1]] == self.excel_to_mail_header_changing_data[2]:
-                                                continue
-                                        try:
-                                            for path in self.individual_attachments_header:
-                                                if os.path.exists(r"{}".format(row[path])):
-                                                    self.attachment_file_path_list.append(r"{}".format(row[path]))
-                                            recipient_email = row.iloc[0] # Assuming your Excel file has a column named 'Email'
-                                            gmail.username =   email_data.iloc[0]# Notification mail sent to registered mail of customer
-                                            gmail.password = email_data.iloc[1]
-                                            gmail.send(subject = self.email_subject,
-                                                        bcc = self.email_bcc,
-                                                        cc = self.email_cc,
-                                                        receivers = [recipient_email],
-                                                        text = self.full_body_text_content,
-                                                        html = self.html_full_content,
-                                                        body_params = self.evaluate_body_params(row),
-                                                        attachments = self.attachment_file_path_list)
-                                            self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
-                                            self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
-                                            self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data.iloc[0])
-                                            self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]].astype(object)
-                                            self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[1]] = self.excel_to_mail_header_changing_data[2]
-                                            self.completed_count += 1
-                                            progressbar_value = (self.completed_count)/self.total_email_data_count
-                                            email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
-                                            email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
-                                            email_progressbar.set(progressbar_value)
-                                            self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
-                                            break
-                                        except AttributeError:
-                                            error_mail_id.append(email_data.iloc[0])
-                                        except smtplib.SMTPAuthenticationError:
-                                            error_mail_id.append(email_data.iloc[0]) 
-                                        except Exception as e:
-                                            error_mail_id.append(email_data.iloc[0])
-                                            logging.error(e)
-                            except Exception as e:
-                                logging.error(e)
-                        else:
-                            messagebox.showwarning("Stop", "Process Stopped")
-                            self.back_to_normal()
-                            break
-                    else:
-                        messagebox.showwarning("Error", "No Internet Connection")
-                        self.back_to_normal()
-                        break
-            else:
-                logging.error(f"Error mail id :{len(error_mail_id)}, Total Email: {len(self.excel_file_df_from_mail)}")
-                if len(error_mail_id) != len(self.excel_file_df_from_mail):
-                    messagebox.showinfo("Succcess", "Email Sent Successfully")
-                else:
-                    messagebox.showerror("Error","Mail Error (Try Again)")
-                self.back_to_normal()
-            
-            while file_saving_flag == 0:
-                try:
-                    # Step 2: Create an ExcelWriter object
+                    # Step 1: Create an ExcelWriter object
                     with pd.ExcelWriter(self.excel_file_path, engine='openpyxl') as writer:
                         # Write each DataFrame to a different sheet
                         self.excel_file_df_from_mail.to_excel(writer, sheet_name=self.excel_sheet_name[0], index=False)
@@ -998,70 +1039,172 @@ class App(customtkinter.CTk):
                                 pass
                         except ValueError:
                             self.excel_file_df_guide.to_excel(writer, sheet_name=self.excel_sheet_name[2], index=False)
-                    file_saving_flag = 1
+                    file_open_flag = 1
                 except PermissionError:
                     messagebox.showwarning("Permission Error", f"File path: {self.excel_file_path} is already open.\nClose the file and try again")
         
-            
 
-            self.excel_file_df_from_mail = None
-            self.excel_file_df_to_mail = None
-            self.excel_file_df_guide = None
-            self.html_full_content = None
-            self.full_body_text_content = None
-            self.body_params = None
-            self.excel_file_path = None
-            self.excel_file_to_mail_header_list = []
-            self.scrollable_frame_switches = []
-            self.attachment_file_path_list = []
-            self.static_attachment_file_count = 0
-            # self.html_state = ["Dynamic","Static"]
-            self.html_state = ["Advanced","Normal"]
-            self.current_html_state = None
-            self.individual_attachments_header=[]
-            self.dynamic_scrollable_frame_checkbox = []
-            self.replacer_keyword_list = []
-            self.email_subject = ""
-            self.break_flag = 0
-            self.total_email_data_count = 0
-            self.completed_count = 0
-            self.email_cc = None
-            self.email_bcc = None
+    # Final frame and Email Loading Bar(Update function)
+    def update_progress(self):
+        progressbar_value = (self.completed_count)/self.total_email_data_count
+        email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
+        email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
+        email_progressbar.set(progressbar_value)
+        self.progressbar_text.configure(text=f"{self.completed_count}/{self.total_email_data_count}")
 
-            # Deleting old values while second run(if present)
-            self.entry_dynamic.delete(0,"end")
-            self.textbox_dynamic.delete(1.0,"end")
-            self.entry_static.delete(0,"end")
-            self.textbox_static.delete(1.0,"end")
-            self.subject_entry.delete(0,"end")
-            self.cc_entry.delete(0,"end")
-            self.bcc_entry.delete(0,"end")
-        
+
+    # Email Sent entry in excel function
+    def excel_sent_entry_func(self,index,email_data):
+
+        self.attachment_file_path_list = self.attachment_file_path_list[:self.static_attachment_file_count]
+        self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]].astype(object)
+        self.excel_file_df_to_mail.loc[index, self.excel_to_mail_header_changing_data[0]] = str(email_data)
+        self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]].astype(object)
+        self.excel_file_df_to_mail.loc[index,self.excel_to_mail_header_changing_data[1]] = self.excel_to_mail_header_changing_data[2]                                       
+
+
+    # Main Mail sender function
+    def mail_processor(self):
+        try:
+            email_progressbar = customtkinter.CTkProgressBar(master=self.third_frame,height=20, width=500)
+            email_progressbar.grid(row=0, column=0, columnspan=2, padx=(150,0), pady=(200,0))
+            self.progressbar_text.configure(text=f"0/{self.total_email_data_count}")
+            email_progressbar.set(0)
+            file_open_flag = 0
+            no_internet_flag = 0
+            while file_open_flag == 0:
+                try:
+                    excel_header = pd.read_excel(self.excel_file_path,sheet_name=self.excel_sheet_name[1])
+                    file_open_flag = 1
+                except PermissionError:
+                        messagebox.showwarning("Permission Error", f"File path: {self.excel_file_path} is already open.\nClose the file and try again")
+            excelfile_to_mail_header_list = excel_header.columns.tolist()
+            if self.excel_to_mail_header_changing_data[0] not in excelfile_to_mail_header_list:
+                self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[0]] = ""
+                if self.excel_to_mail_header_changing_data[1] not in excelfile_to_mail_header_list:
+                    self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = ""
+            else:
+                if self.excel_to_mail_header_changing_data[1] not in excelfile_to_mail_header_list:
+                    self.excel_file_df_to_mail[self.excel_to_mail_header_changing_data[1]] = ""
+            internet_result = self.check_wifi_and_internet()
+            if internet_result == 1:
+                while self.email_processing:
+                    for index, row in self.excel_file_df_to_mail.iterrows():
+                            if not self.email_processing:
+                                break
+                            if not (pd.isna(row["To_Mail_Id"])):
+                                if no_internet_flag == 0:
+                                        
+                                    for i, email_data in self.excel_file_df_from_mail.iterrows():
+                                        if email_data.iloc[0] not in self.error_mail_id:
+                                            if self.excel_to_mail_header_changing_data[1] in excelfile_to_mail_header_list:
+                                                if row[self.excel_to_mail_header_changing_data[1]] == self.excel_to_mail_header_changing_data[2]:
+                                                    continue
+
+                                            for path in self.individual_attachments_header:
+                                                if os.path.exists(r"{}".format(row[path])):
+                                                    self.attachment_file_path_list.append(r"{}".format(row[path]))
+                                            recipient_email = row.iloc[0] # Assuming your Excel file has a column named 'Email'
+
+                                            result = self.send_email_with_retry(email_data.iloc[0], email_data.iloc[1], recipient_email, row)
+                                            if result == 1:
+                                                self.excel_sent_entry_func(index, email_data.iloc[0])
+                                                self.completed_count += 1
+                                                self.after(0,self.update_progress())
+                                                break
+                                            elif result == 0:
+                                                no_internet_flag = 1
+                                                self.back_to_normal()
+                                                break
+                                            else:
+                                                self.error_mail_id.append(email_data.iloc[0])
+                                else:
+                                    self.save_file()
+                                    self.back_to_normal()
+                                    messagebox.showwarning("Error", "No Internet Connection")
+                                    self.email_processing = False
+                                    break
+                            else:
+                                self.completed_count += 1
+                    else:
+                        logging.error(f"Error mail id :{len(self.error_mail_id)}, Total Email: {len(self.excel_file_df_from_mail)}")
+                        self.back_to_normal()
+                        self.save_file()
+                        
+                        if len(self.error_mail_id) != len(self.excel_file_df_from_mail):
+                            messagebox.showinfo("Succcess", "Email Sent Successfully")
+                        else:
+                            messagebox.showerror("Error","Mail Error (Try Again)")
+                        self.email_processing = False
+                        self.values_reset_func()
+            else:
+                self.back_to_normal()
+                self.values_reset_func()
+                if internet_result == 2:
+                    messagebox.showwarning("Error", "DNS Server Error\nPlease try after sometime!!")
+                elif internet_result == 4:
+                    messagebox.showwarning("Error", "Please turn on Wi-Fi/LAN ")
+                elif internet_result == 5:
+                    messagebox.showwarning("Error", "Wi-Fi/LAN has no internet connection")
+                else:
+                    messagebox.showwarning("Error", "No Internet Connection")
+
+            # self.values_reset_func()
+
+        except Exception as e:
+            logging.error(e)
+            # print(f"Exception in mail_processor: {e}")
+            # pass
+
     # Final frame and Email Loading Bar(start_button)
     def start_email(self):
         self.email_back_button.grid_forget()
         self.start_button.grid_forget()
         self.email_stop_button = customtkinter.CTkButton(self.third_frame, corner_radius=30, text="Stop", fg_color="white", border_color="red", border_width=2,text_color="black", hover_color="red",command=self.stop_back_button_func)
         self.email_stop_button.grid(row=1, column=1, padx=(0,75), pady=(100,0))
-        threading.Thread(target=self.mail_processor).start()
+
+        # Start the email processing thread
+        self.email_processing = True
+        self.email_thread = threading.Thread(target=self.mail_processor)
+        self.email_thread.start()
 
     
-    # To check internet connection
-    def check_internet_connection(self, url, timeout):
+
+    # Internet checking function
+    def check_wifi_and_internet(self):
+
         try:
-            response = requests.get(url, timeout=timeout)
-            # Check if the response status code is 200 (OK)
-            if response.status_code == 200:
-                return True
+            socket.create_connection((self.ip_add, self.port_no), timeout=5)
+            return 1
+
+        except socket.gaierror as e:
+            logging.error(e)
+            if e.errno == 11001: # We have internet but we are not able to connect to particular ip we have given
+                # print("DNS resolution failed. Please check the hostname or your internet connection.")
+                return 2
             else:
-                return False
-        except requests.ConnectionError:
-            # If there's a ConnectionError, the connection failed
-            return False
-        except requests.Timeout:
-            # If there's a Timeout, the request timed out
-            return False
-    
+                # print(f"A socket address-related error occurred: {e}")
+                return 3
+
+        except OSError as e:
+            logging.error(e)
+            if e.errno == 10065: # Our internet/Wi-Fi is not on.
+                # print("Host is unreachable. Please check your network connection or server status.")
+                return 4
+            else:
+                # print(f"An OS error occurred: {e}") # It will give `timed out` error, when we have connected to Wi-Fi but that wifi has no internet connection.
+                return 5
+
+        except socket.error as e:
+            logging.error(e)
+            # print(f"A general socket error occurred: {e}")
+            return 6
+        
+        except Exception as e:
+            logging.error(e)
+            # print(f"A general error occured: {e}")
+            return 7
+        
 
     # Second Frame(Subject and Attachments Frame(Individual Attachments))
     def get_entry_data(self):
@@ -1093,7 +1236,6 @@ class App(customtkinter.CTk):
         # self.textbox_static.delete(1.0,"end")
         # self.subject_entry.delete(0,"end")
 
-
         # set button color for selected button
         self.home_button.configure(fg_color=("#CADCFC", "white") if name == "home" else "#00246B")
         self.frame_2_button.configure(fg_color=("#CADCFC", "white") if name == "frame_2" else "#00246B")
@@ -1112,12 +1254,72 @@ class App(customtkinter.CTk):
         else:
             self.second_frame.grid_forget()
   
+
     # Final frame and Email Loading Bar(email_stop_button)    
     def stop_back_button_func(self):
-        self.break_flag = 1
+        msg = CTkMessagebox(title="Exit?", message="Do you want to stop the program?",
+                        icon="question", option_1="No", option_2="Yes")
+        response = msg.get()
+        if response=="Yes":
+            self.email_processing = False
+            if self.email_thread and self.email_thread.is_alive():
+                # print("Waiting for the current process to finish...")
+                self.check_email_thread_stop_button()  # Periodically check if the thread has finished
+            else:
+                self.save_file()
+                self.back_to_normal()
+                self.values_reset_func()
+
+            
+    # Cancel Button(right top corner)
+    def on_closing(self):
+
+        msg = CTkMessagebox(title="Exit?", message="Do you want to close the program?",
+                        icon="question", option_1="No", option_2="Yes")
+        response = msg.get()
+        
+        if response=="Yes":
+            # Stop email processing if running
+            self.email_processing = False
+            if self.email_thread and self.email_thread.is_alive():
+                # print("Waiting for the current process to finish...")
+                self.check_email_thread()  # Periodically check if the thread has finished
+            else:
+                self.finish_closing()
+
+
+    def check_email_thread_stop_button(self):
+        """Periodically check if the email processing thread has finished."""
+        if self.email_thread and self.email_thread.is_alive():
+            # Check again after 100ms (UI remains responsive)
+            self.after(100, self.check_email_thread_stop_button)
+        else:
+            self.save_file()
+            self.back_to_normal()
+            self.values_reset_func()
+
+    def check_email_thread(self):
+        """Periodically check if the email processing thread has finished."""
+        if self.email_thread and self.email_thread.is_alive():
+            # Check again after 100ms (UI remains responsive)
+            self.after(100, self.check_email_thread)
+        else:
+            self.finish_closing()
+            
+
+    def finish_closing(self):
+
+        self.save_file()  # Save the file with current progress
+        try:
+            self.destroy()  # Close the app
+        except Exception as e:
+            logging.error(e)
+            # print(f"Error on closing: {e}")
+            # pass
+    
 
     def back_to_normal(self):
-        self.break_flag = 0
+
         self.home_frame.grid_forget()
         self.second_frame.grid_forget()
         self.third_frame.grid_forget()
@@ -1128,8 +1330,45 @@ class App(customtkinter.CTk):
         self.home_button.configure(state="normal")
         self.frame_2_button.configure(state="disabled")
 
+
+    def values_reset_func(self):
+
+        self.excel_file_df_from_mail = None
+        self.excel_file_df_to_mail = None
+        self.excel_file_df_guide = None
+        self.html_full_content = None
+        self.full_body_text_content = None
+        self.body_params = None
+        self.excel_file_path = None
+        self.email_thread = None
+        self.excel_file_to_mail_header_list = []
+        self.scrollable_frame_switches = []
+        self.attachment_file_path_list = []
+        self.static_attachment_file_count = 0
+        # self.html_state = ["Dynamic","Static"]
+        self.html_state = ["Advanced","Normal"]
+        self.current_html_state = None
+        self.individual_attachments_header=[]
+        self.dynamic_scrollable_frame_checkbox = []
+        self.replacer_keyword_list = []
+        self.email_subject = ""
+        self.total_email_data_count = 0
+        self.completed_count = 0
+        self.email_cc = None
+        self.email_bcc = None
+        self.error_mail_id = []
+
+        # Deleting old values while second run(if present)
+        self.entry_dynamic.delete(0,"end")
+        self.textbox_dynamic.delete(1.0,"end")
+        self.entry_static.delete(0,"end")
+        self.textbox_static.delete(1.0,"end")
+        self.subject_entry.delete(0,"end")
+        self.cc_entry.delete(0,"end")
+        self.bcc_entry.delete(0,"end")
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()
 
-
+    

@@ -1,3 +1,230 @@
 2024-08-16 16:51:58,839 - ERROR - Error mail id :0, Total Email: 1
 2024-08-16 16:53:21,751 - ERROR - Error mail id :0, Total Email: 1
 2024-08-16 17:01:04,373 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 12:22:11,591 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 14:39:13,566 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 14:40:25,259 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 16:31:55,067 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 17:29:13,842 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:35:02,492 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:37:53,402 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:43:36,766 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:48:13,127 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:54:28,631 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:55:38,025 - ERROR - '_tkinter.tkapp' object has no attribute 'attachment_back_button'
+2024-08-19 17:59:34,959 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 18:02:50,043 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 18:24:19,891 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 18:42:05,700 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 18:42:38,299 - ERROR - File is not a zip file
+2024-08-19 18:42:43,098 - ERROR - Excel file format cannot be determined, you must specify an engine manually.
+2024-08-19 18:52:28,890 - ERROR - Error mail id :0, Total Email: 1
+2024-08-19 18:59:02,697 - ERROR - Error mail id :0, Total Email: 1
+2024-08-27 15:31:04,537 - ERROR - Error mail id :0, Total Email: 1
+2024-08-29 20:17:49,950 - ERROR - Error mail id :0, Total Email: 1
+2024-08-29 21:45:35,713 - ERROR - Error mail id :0, Total Email: 1
+2024-08-29 21:47:39,173 - ERROR - Error mail id :0, Total Email: 1
+2024-08-30 12:33:58,582 - ERROR - Error mail id :0, Total Email: 1
+2024-08-30 12:46:21,989 - ERROR - Error mail id :0, Total Email: 1
+2024-08-30 12:57:43,800 - ERROR - Error mail id :0, Total Email: 1
+2024-08-30 13:48:13,410 - ERROR - Connection unexpectedly closed: [WinError 10054] An existing connection was forcibly closed by the remote host
+2024-08-30 13:48:13,724 - ERROR - Error mail id :1, Total Email: 1
+2024-08-30 14:23:55,460 - ERROR - Error mail id :0, Total Email: 1
+2024-08-30 18:42:13,677 - ERROR - please run connect() first
+2024-08-30 18:42:13,994 - ERROR - Error mail id :1, Total Email: 1
+2024-08-31 12:14:11,157 - ERROR - Connection unexpectedly closed
+2024-08-31 12:14:11,188 - ERROR - please run connect() first
+2024-08-31 12:14:11,237 - ERROR - please run connect() first
+2024-08-31 12:14:11,480 - ERROR - Error mail id :3, Total Email: 3
+2024-08-31 12:15:42,793 - ERROR - please run connect() first
+2024-08-31 12:15:42,841 - ERROR - please run connect() first
+2024-08-31 12:15:42,872 - ERROR - please run connect() first
+2024-08-31 12:15:43,123 - ERROR - Error mail id :3, Total Email: 3
+2024-08-31 13:06:50,309 - ERROR - Error mail id :0, Total Email: 3
+2024-08-31 13:53:13,305 - ERROR - (550, b'5.4.5 Daily user sending limit exceeded. For more information on Gmail\n5.4.5 sending limits go to\n5.4.5  https://support.google.com/a/answer/166852 d9443c01a7336-2055201f7c2sm3283885ad.162 - gsmtp')
+2024-08-31 14:57:27,298 - ERROR - (550, b'5.4.5 Daily user sending limit exceeded. For more information on Gmail\n5.4.5 sending limits go to\n5.4.5  https://support.google.com/a/answer/166852 98e67ed59e1d1-2d844489545sm7888023a91.0 - gsmtp')
+2024-08-31 15:43:10,830 - ERROR - (550, b'5.4.5 Daily user sending limit exceeded. For more information on Gmail\n5.4.5 sending limits go to\n5.4.5  https://support.google.com/a/answer/166852 98e67ed59e1d1-2d85b39d398sm5337235a91.42 - gsmtp')
+2024-08-31 16:12:08,776 - ERROR - Error mail id :1, Total Email: 3
+2024-09-01 11:12:03,093 - ERROR - Error mail id :0, Total Email: 3
+2024-09-01 12:40:44,134 - ERROR - (550, b'5.4.5 Daily user sending limit exceeded. For more information on Gmail\n5.4.5 sending limits go to\n5.4.5  https://support.google.com/a/answer/166852 41be03b00d2f7-7d22e9d4ee3sm4769837a12.83 - gsmtp')
+2024-09-01 16:47:51,086 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-01 16:48:03,127 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-01 16:48:03,143 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-01 16:48:03,882 - ERROR - Error mail id :3, Total Email: 3
+2024-09-02 12:04:09,121 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 14:01:02,753 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 14:27:27,656 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 15:01:27,916 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 15:31:42,008 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 16:01:58,025 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 16:22:39,057 - ERROR - Error mail id :0, Total Email: 3
+2024-09-02 17:13:13,144 - ERROR - (550, b'5.4.5 Daily user sending limit exceeded. For more information on Gmail\n5.4.5 sending limits go to\n5.4.5  https://support.google.com/a/answer/166852 d2e1a72fcca58-715e55aa11fsm6700874b3a.85 - gsmtp')
+2024-09-02 17:36:28,596 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d2e1a72fcca58-715e55a5200sm6754814b3a.73 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. d2e1a72fcca58-715e55a5200sm6754814b3a.73 - gsmtp')}
+2024-09-02 17:36:31,475 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d9443c01a7336-205723f27f4sm17641565ad.26 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. d9443c01a7336-205723f27f4sm17641565ad.26 - gsmtp')}
+2024-09-02 17:36:32,973 - ERROR - Error mail id :3, Total Email: 3
+2024-09-03 10:33:02,525 - ERROR - please run connect() first
+2024-09-03 10:33:02,557 - ERROR - please run connect() first
+2024-09-03 10:33:02,589 - ERROR - please run connect() first
+2024-09-03 10:33:03,999 - ERROR - Error mail id :3, Total Email: 3
+2024-09-03 12:07:01,894 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. 41be03b00d2f7-7d22e776480sm8612299a12.36 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. 41be03b00d2f7-7d22e776480sm8612299a12.36 - gsmtp')}
+2024-09-03 12:07:04,898 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d9443c01a7336-2055201f7c2sm41368375ad.162 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. d9443c01a7336-2055201f7c2sm41368375ad.162 - gsmtp')}
+2024-09-03 12:07:07,413 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. 98e67ed59e1d1-2da505c10a8sm1640488a91.24 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. 98e67ed59e1d1-2da505c10a8sm1640488a91.24 - gsmtp')}
+2024-09-03 12:07:07,815 - ERROR - Error mail id :3, Total Email: 3
+2024-09-03 12:55:25,266 - ERROR - Error mail id :0, Total Email: 3
+2024-09-03 15:55:40,240 - ERROR - Error mail id :0, Total Email: 3
+2024-09-04 12:30:58,394 - ERROR - Error mail id :0, Total Email: 3
+2024-09-04 14:32:07,428 - ERROR - please run connect() first
+2024-09-04 14:32:07,428 - ERROR - please run connect() first
+2024-09-04 14:32:07,428 - ERROR - please run connect() first
+2024-09-04 14:32:07,818 - ERROR - Error mail id :3, Total Email: 3
+2024-09-04 14:33:06,650 - ERROR - please run connect() first
+2024-09-04 14:33:06,652 - ERROR - please run connect() first
+2024-09-04 14:33:06,654 - ERROR - please run connect() first
+2024-09-04 14:33:06,784 - ERROR - Error mail id :3, Total Email: 3
+2024-09-04 15:03:55,585 - ERROR - Error mail id :0, Total Email: 3
+2024-09-05 13:05:21,405 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 10:34:10,416 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. 98e67ed59e1d1-2db041a2cb8sm3559444a91.20 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. 98e67ed59e1d1-2db041a2cb8sm3559444a91.20 - gsmtp')}
+2024-09-09 10:34:10,426 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 10:37:05,950 - ERROR - {'nan': (553, b'5.1.3 The recipient address <nan> is not a valid RFC 5321 address. For more\n5.1.3 information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d2e1a72fcca58-718e58bd2a2sm2736503b3a.56 - gsmtp'), '': (555, b'5.5.2 Syntax error, cannot decode response. For more information, go to\n5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.5.2 specifications. d2e1a72fcca58-718e58bd2a2sm2736503b3a.56 - gsmtp')}
+2024-09-09 10:37:05,952 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 10:38:46,768 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 10:41:01,288 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 10:42:30,827 - ERROR - main thread is not in main loop
+2024-09-09 10:42:30,827 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 10:49:44,344 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-09 10:49:44,345 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 12:14:04,143 - ERROR - main thread is not in main loop
+2024-09-09 12:14:04,374 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 12:15:06,411 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 12:38:41,524 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-09 12:38:41,531 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 12:40:08,774 - ERROR - [Errno 11001] getaddrinfo failed
+2024-09-09 13:05:00,256 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 13:16:38,842 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 13:23:31,067 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 14:46:27,509 - ERROR - main thread is not in main loop
+2024-09-09 14:46:27,987 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 15:03:49,045 - ERROR - main thread is not in main loop
+2024-09-09 15:03:49,049 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 15:05:54,325 - ERROR - main thread is not in main loop
+2024-09-09 15:43:07,686 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 15:57:12,185 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 16:25:43,120 - ERROR - main thread is not in main loop
+2024-09-09 16:25:43,126 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 16:34:19,358 - ERROR - cannot access local variable 'retries' where it is not associated with a value
+2024-09-09 16:34:19,361 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 16:37:17,455 - ERROR - cannot access local variable 'retries' where it is not associated with a value
+2024-09-09 16:37:17,459 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 16:40:17,868 - ERROR - cannot access local variable 'retries' where it is not associated with a value
+2024-09-09 16:40:17,871 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 16:44:22,930 - ERROR - cannot access local variable 'retries' where it is not associated with a value
+2024-09-09 16:44:22,931 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 16:46:42,855 - ERROR - Worksheet named 'From_Mail' not found
+2024-09-09 16:47:32,248 - ERROR - cannot access local variable 'retries' where it is not associated with a value
+2024-09-09 16:47:32,252 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 17:58:57,231 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 18:01:56,101 - ERROR - main thread is not in main loop
+2024-09-09 18:01:56,104 - ERROR - Error mail id :1, Total Email: 1
+2024-09-09 18:19:31,665 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 18:22:42,210 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 18:41:51,463 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 18:45:22,520 - ERROR - Error mail id :0, Total Email: 1
+2024-09-09 18:53:23,121 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 12:49:15,054 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 12:49:23,671 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 12:50:30,988 - ERROR - 'FromMail'
+2024-09-10 12:50:30,988 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:32,774 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:34,171 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:34,736 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:35,070 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:35,321 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:35,552 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:35,815 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:36,141 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:36,578 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:36,944 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:37,295 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:37,662 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:38,137 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:38,459 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:38,717 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:39,068 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:39,260 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:39,611 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:40,592 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:41,016 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 12:50:48,097 - ERROR - Error mail id :1, Total Email: 1
+2024-09-10 15:48:33,097 - ERROR - invalid command name ".!ctkframe6.!ctklabel2.!label"
+2024-09-10 15:51:59,963 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:00:39,617 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:01:52,616 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:04:29,757 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:06:11,922 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:07:14,317 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:07:17,960 - ERROR - Worksheet named 'From_Mail' not found
+2024-09-10 16:07:37,585 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:07:56,603 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:09:11,717 - ERROR - Worksheet named 'From_Mail' not found
+2024-09-10 16:10:39,154 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:15:29,984 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:21:55,277 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:40,971 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:42,412 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:43,809 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:44,552 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:44,952 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:45,290 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:45,896 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:46,121 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:46,666 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:47,075 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:47,851 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:48,228 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:48,595 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:48,868 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:50,471 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:22:52,459 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:23:16,465 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:01,305 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:11,391 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:12,179 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:12,848 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:13,425 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:13,939 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:14,380 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:15,204 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:15,750 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:16,301 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:16,756 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:17,200 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:17,688 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:18,159 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:18,608 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:19,058 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:19,504 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:19,981 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:20,556 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:21,933 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:26:27,430 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:29:34,622 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:30:20,736 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:31:32,612 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:32:08,212 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:33:19,529 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:36:02,846 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 16:36:45,302 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:38:19,146 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:38:52,777 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:39:32,776 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:47:28,710 - ERROR - 'NoneType' object is not subscriptable
+2024-09-10 16:51:13,342 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 17:37:57,373 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 17:44:36,379 - ERROR - Error mail id :0, Total Email: 1
+2024-09-10 18:55:30,503 - ERROR - Error mail id :0, Total Email: 1
+2024-09-11 10:57:53,150 - ERROR - Error mail id :0, Total Email: 1
+2024-09-11 12:51:25,892 - ERROR - Error mail id :1, Total Email: 2
+2024-09-11 15:58:50,824 - ERROR - Error mail id :2, Total Email: 2
+2024-09-11 16:01:23,307 - ERROR - Error mail id :2, Total Email: 2
+2024-09-11 16:02:45,033 - ERROR - Error mail id :2, Total Email: 2
+2024-09-11 16:16:04,147 - ERROR - Error mail id :2, Total Email: 2
