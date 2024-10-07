@@ -435,10 +435,14 @@ class App(customtkinter.CTk):
                         else:
                             self.total_email_data_count = len(self.excel_file_df_to_mail)
                         if self.excel_to_mail_header_changing_data[3] in self.excel_file_to_mail_header_list:
-                            if self.total_email_data_count != 0:
-                                self.frame_2_button_event()
+                            if self.excel_file_to_mail_header_list[0] == self.excel_to_mail_header_changing_data[3]:
+                                # print(self.excel_file_to_mail_header_list[0])
+                                if self.total_email_data_count != 0:
+                                    self.frame_2_button_event()
+                                else:
+                                    messagebox.showwarning("Warning","Emails Sent Already")
                             else:
-                                messagebox.showwarning("Warning","Emails Sent Already")
+                                messagebox.showwarning("Warning",f"Expecting `{self.excel_to_mail_header_changing_data[3]}` column as first column")
                         else:
                             messagebox.showwarning("Warning",f"There is no `{self.excel_to_mail_header_changing_data[3]}` column in `{self.excel_sheet_name[1]}` sheet")
                     else:
@@ -539,8 +543,8 @@ class App(customtkinter.CTk):
             self.attachment_sub_button.destroy()
             self.static_preview_logo_button.destroy()
         except Exception as e:
-            logging.error(e)
-            # pass
+            # logging.error(e)
+            pass
         if (dynamic_text_value.strip() == "" or dynamic_text_value.strip() == "Html Code goes here.../ Upload the html file") and dynamic_upload_value.strip() == "":
             self.seg_button_1.configure(state="normal")
             messagebox.showwarning("Error","Please enter a value/select the file")
@@ -935,22 +939,25 @@ class App(customtkinter.CTk):
                 attachments=self.attachment_file_path_list
             )            
         except socket.gaierror:
+            logging.error(f"Failed to send email due to DNS resolution error")
             # print(f"Failed to send email due to DNS resolution error")
             raise socket.gaierror ("DNS resolution Error")   
         except smtplib.SMTPAuthenticationError:
+            logging.error(f"{str(sender_email)} - Failed to send email due to bad credentials")
             # print(f'Failed to send email due to bad credentials')
             raise smtplib.SMTPAuthenticationError("Username or App password wrong")
         except smtplib.SMTPException as e:
-            logging.error(e)
             if 'Quota exceeded' in str(e):
+                logging.error(f"{str(sender_email)} - Email limit exceeded. You have hit the daily sending limit.")
                 # print('Email limit exceeded. You have hit the daily sending limit.')
                 raise smtplib.SMTPException("Limit Exceed")
             else:
+                logging.error(f"{str(sender_email)} - SMTP error occured")
                 # print(f'SMTP error occurred: {e}')
                 raise smtplib.SMTPException(e)
         except Exception as e:
             # print(f"Failed to send email: {e}")
-            logging.error(e)
+            logging.error(f"{str(sender_email)} - Failed to send email: {e}")
             raise Exception (e)
 
 
@@ -961,7 +968,8 @@ class App(customtkinter.CTk):
             # return True
             result_queue.put(True)
         except Exception as e:
-            logging.error(e)
+            # logging.error(e)
+            pass
             # print(f"Email sending failed: {e}")
             if isinstance(e, socket.gaierror):
                 self.save_file()
@@ -1121,13 +1129,14 @@ class App(customtkinter.CTk):
                                 else:
                                     self.save_file()
                                     self.back_to_normal()
+                                    logging.error("No Internet Connection")
                                     messagebox.showwarning("Error", "No Internet Connection")
                                     self.email_processing = False
                                     break
                             else:
                                 self.completed_count += 1
                     else:
-                        logging.error(f"Error mail id :{len(self.error_mail_id)}, Total Email: {len(self.excel_file_df_from_mail)}")
+                        # logging.error(f"Error mail id :{len(self.error_mail_id)}, Total Email: {len(self.excel_file_df_from_mail)}")
                         self.back_to_normal()
                         self.save_file()
                         
@@ -1145,8 +1154,10 @@ class App(customtkinter.CTk):
                 elif internet_result == 4:
                     messagebox.showwarning("Error", "Please turn on Wi-Fi/LAN ")
                 elif internet_result == 5:
+                    logging.error("No Internet Connection")
                     messagebox.showwarning("Error", "Wi-Fi/LAN has no internet connection")
                 else:
+                    logging.error("No Internet Connection")
                     messagebox.showwarning("Error", "No Internet Connection")
 
             # self.values_reset_func()
